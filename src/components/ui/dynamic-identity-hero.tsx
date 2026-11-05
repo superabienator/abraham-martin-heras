@@ -4,9 +4,9 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/context/language-context";
-import { Volume2, VolumeX, RotateCcw, Sparkles } from "lucide-react";
+import { Volume2, VolumeX, RotateCcw } from "lucide-react";
 
-type AnimationStage = "words" | "collapsing" | "converging" | "fusing" | "settled";
+type AnimationStage = "words" | "collapsing" | "converging" | "nebula" | "settled";
 
 export function DynamicIdentityHero() {
   const { language } = useLanguage();
@@ -20,65 +20,67 @@ export function DynamicIdentityHero() {
   const playAudio = useCallback(() => {
     if (audioRef.current && !isMuted) {
       audioRef.current.currentTime = 0;
-      audioRef.current.volume = 0.75;
+      audioRef.current.volume = 0.8;
       audioRef.current.play().then(() => {
         setAudioUnlocked(true);
       }).catch(() => {
-        // Autoplay policy prevented playback until user interaction
         setAudioUnlocked(false);
       });
     }
   }, [isMuted]);
 
-  // Clear pending timers
   const clearTimers = () => {
     timeoutsRef.current.forEach(clearTimeout);
     timeoutsRef.current = [];
   };
 
-  // Run the full sequence upon replay button click
+  // Replay sequence on user action
   const handleReplay = useCallback(() => {
     clearTimers();
     setStage("words");
 
+    // Phase 1 -> 2: Suffix letters collapse at 1.4s
     const t1 = setTimeout(() => {
       setStage("collapsing");
-    }, 1500);
+    }, 1400);
 
+    // Phase 2 -> 3: Initials converge at 2.4s
     const t2 = setTimeout(() => {
       setStage("converging");
-      playAudio();
-    }, 2600);
+    }, 2400);
 
+    // Phase 3 -> 4: Color Nebula Cloud erupts at 3.1s + Sound Effect
     const t3 = setTimeout(() => {
-      setStage("fusing");
-    }, 3600);
+      setStage("nebula");
+      playAudio();
+    }, 3100);
 
+    // Phase 4 -> 5: Cloud dissipates, revealing settled AMH Favicon at 4.1s
     const t4 = setTimeout(() => {
       setStage("settled");
-    }, 4400);
+    }, 4100);
 
     timeoutsRef.current = [t1, t2, t3, t4];
   }, [playAudio]);
 
-  // Schedule initial progression on mount without synchronous setState in effect body
+  // Initial auto-progression on mount
   useEffect(() => {
     const t1 = setTimeout(() => {
       setStage("collapsing");
-    }, 1500);
+    }, 1400);
 
     const t2 = setTimeout(() => {
       setStage("converging");
-      playAudio();
-    }, 2600);
+    }, 2400);
 
     const t3 = setTimeout(() => {
-      setStage("fusing");
-    }, 3600);
+      setStage("nebula");
+      playAudio();
+    }, 3100);
 
     const t4 = setTimeout(() => {
       setStage("settled");
-    }, 4400);
+    }, 4100);
 
     timeoutsRef.current = [t1, t2, t3, t4];
 
@@ -90,7 +92,7 @@ export function DynamicIdentityHero() {
     };
   }, [playAudio]);
 
-  // Audio unlock on first user click if browser blocked autoplay
+  // Gesture listener to unlock audio on first interaction if blocked by browser
   useEffect(() => {
     const unlockOnGesture = () => {
       if (!audioUnlocked && audioRef.current) {
@@ -122,13 +124,14 @@ export function DynamicIdentityHero() {
     }
   };
 
-  const isCollapsed = stage === "collapsing" || stage === "converging" || stage === "fusing" || stage === "settled";
-  const isMerged = stage === "fusing" || stage === "settled";
+  const isCollapsed = stage === "collapsing" || stage === "converging" || stage === "nebula" || stage === "settled";
+  const isCloudActive = stage === "nebula";
+  const isSettled = stage === "settled";
   const isEs = language === "es";
 
   return (
-    <section aria-label="AMH Identity Formation" className="relative w-full pt-4 pb-8 flex flex-col items-center justify-center text-center">
-      {/* Hidden Audio element pointing to original sound */}
+    <section aria-label="AMH Identity Formation" className="relative w-full pt-4 pb-6 flex flex-col items-center justify-center text-center">
+      {/* Hidden Audio track for synchronized formation sound */}
       <audio
         ref={audioRef}
         src="/amh-formation.mp4"
@@ -137,44 +140,90 @@ export function DynamicIdentityHero() {
       />
 
       {/* Main Kinetic Stage: Centered Formation Canvas */}
-      <div className="relative flex flex-col items-center justify-center min-h-[160px] sm:min-h-[190px] w-full max-w-4xl px-4 select-none">
-        <AnimatePresence mode="wait">
-          {!isMerged ? (
-            /* =========================================================================
-               PHASE A: "Abraham  Martín  Heras" condensing into initials "A M H"
-               ========================================================================= */
+      <div className="relative flex flex-col items-center justify-center min-h-[170px] sm:min-h-[210px] w-full max-w-4xl px-4 select-none">
+        
+        {/* =========================================================================
+            CHROMATIC NEBULA CLOUD (Nube de Color Cósmica)
+            Erupts when the 3 letters collide and parts as the favicon settles
+           ========================================================================= */}
+        <AnimatePresence>
+          {(isCloudActive || isSettled) && (
             <motion.div
-              key="dynamic-words-container"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
+              key="chromatic-nebula"
+              initial={{ scale: 0.2, opacity: 0 }}
+              animate={{
+                scale: isCloudActive ? [0.3, 1.45, 1.15] : 1.0,
+                opacity: isCloudActive ? [0, 0.95, 0.8] : 0.45,
+                rotate: isCloudActive ? [0, 45, 90] : 0,
+              }}
+              exit={{ opacity: 0, scale: 1.5 }}
+              transition={{
+                duration: isCloudActive ? 1.0 : 0.8,
+                ease: "easeOut",
+              }}
+              className="pointer-events-none absolute inset-0 m-auto h-44 w-44 sm:h-64 sm:w-64 rounded-full"
+            >
+              {/* Outer Cyan / Emerald Bloom */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-cyan-400 via-teal-500 to-emerald-400 blur-3xl opacity-70 animate-pulse" />
+              {/* Mid Layer Royal / Indigo Mist */}
+              <div className="absolute inset-2 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 blur-2xl opacity-80" />
+              {/* Core Deep Violet Flame */}
+              <div className="absolute inset-6 rounded-full bg-gradient-to-b from-purple-500 via-violet-700 to-indigo-800 blur-xl opacity-90" />
+              
+              {/* Shockwave expanding ring */}
+              {isCloudActive && (
+                <motion.div
+                  initial={{ scale: 0.6, opacity: 0.9 }}
+                  animate={{ scale: 2.2, opacity: 0 }}
+                  transition={{ duration: 0.9, ease: "easeOut" }}
+                  className="absolute inset-0 rounded-full border-2 border-cyan-300 dark:border-cyan-400"
+                />
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* =========================================================================
+            PHASE 1 & 2: Geometric Typography "ABRAHAM MARTÍN HERAS" -> "A M H"
+           ========================================================================= */}
+        <AnimatePresence mode="wait">
+          {!isSettled && (
+            <motion.div
+              key="words-letters-stage"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{
+                opacity: isCloudActive ? 0 : 1,
+                scale: isCloudActive ? 0.85 : 1,
+                y: 0,
+              }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.45, ease: "easeInOut" }}
               className={`flex items-center justify-center flex-wrap transition-all duration-700 ease-out ${
-                stage === "converging" ? "gap-0.5" : "gap-4 sm:gap-7"
+                stage === "converging" || stage === "nebula" ? "gap-1 sm:gap-2" : "gap-4 sm:gap-7"
               }`}
             >
-              {/* Word 1: Abraham (Initial A - Violet) */}
-              <div className="inline-flex items-baseline overflow-hidden">
-                <span className="font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight bg-gradient-to-br from-purple-600 to-violet-700 dark:from-purple-400 dark:to-violet-400 bg-clip-text text-transparent drop-shadow-sm">
+              {/* WORD 1: ABRAHAM (Geometric Heavy Sans - Montserrat) */}
+              <div className="inline-flex items-baseline overflow-hidden font-brand">
+                <span className="font-black text-4xl sm:text-5xl md:text-6xl tracking-tight bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 dark:from-violet-400 dark:via-purple-400 dark:to-indigo-300 bg-clip-text text-transparent drop-shadow-sm">
                   A
                 </span>
                 <motion.span
-                  initial={{ opacity: 1, maxWidth: "160px" }}
+                  initial={{ opacity: 1, maxWidth: "180px" }}
                   animate={{
                     opacity: isCollapsed ? 0 : 1,
-                    maxWidth: isCollapsed ? "0px" : "160px",
-                    letterSpacing: isCollapsed ? "-0.2em" : "0em",
+                    maxWidth: isCollapsed ? "0px" : "180px",
+                    letterSpacing: isCollapsed ? "-0.25em" : "0.02em",
                   }}
-                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight text-slate-800 dark:text-slate-100 whitespace-nowrap overflow-hidden inline-block"
+                  transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+                  className="font-black text-3xl sm:text-4xl md:text-5xl tracking-tight text-slate-800 dark:text-slate-100 uppercase whitespace-nowrap overflow-hidden inline-block"
                 >
                   braham
                 </motion.span>
               </div>
 
-              {/* Word 2: Martín (Initial M - Indigo / Royal Blue) */}
-              <div className="inline-flex items-baseline overflow-hidden">
-                <span className="font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight bg-gradient-to-br from-indigo-600 to-blue-600 dark:from-indigo-400 dark:to-blue-400 bg-clip-text text-transparent drop-shadow-sm">
+              {/* WORD 2: MARTÍN (Geometric Heavy Sans - Montserrat) */}
+              <div className="inline-flex items-baseline overflow-hidden font-brand">
+                <span className="font-black text-4xl sm:text-5xl md:text-6xl tracking-tight bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 dark:from-indigo-400 dark:via-blue-400 dark:to-cyan-300 bg-clip-text text-transparent drop-shadow-sm">
                   M
                 </span>
                 <motion.span
@@ -182,18 +231,18 @@ export function DynamicIdentityHero() {
                   animate={{
                     opacity: isCollapsed ? 0 : 1,
                     maxWidth: isCollapsed ? "0px" : "160px",
-                    letterSpacing: isCollapsed ? "-0.2em" : "0em",
+                    letterSpacing: isCollapsed ? "-0.25em" : "0.02em",
                   }}
-                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
-                  className="font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight text-slate-800 dark:text-slate-100 whitespace-nowrap overflow-hidden inline-block"
+                  transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+                  className="font-black text-3xl sm:text-4xl md:text-5xl tracking-tight text-slate-800 dark:text-slate-100 uppercase whitespace-nowrap overflow-hidden inline-block"
                 >
                   artín
                 </motion.span>
               </div>
 
-              {/* Word 3: Heras (Initial H - Cyan / Teal) */}
-              <div className="inline-flex items-baseline overflow-hidden">
-                <span className="font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight bg-gradient-to-br from-cyan-600 to-teal-600 dark:from-cyan-400 dark:to-teal-400 bg-clip-text text-transparent drop-shadow-sm">
+              {/* WORD 3: HERAS (Geometric Heavy Sans - Montserrat) */}
+              <div className="inline-flex items-baseline overflow-hidden font-brand">
+                <span className="font-black text-4xl sm:text-5xl md:text-6xl tracking-tight bg-gradient-to-br from-cyan-600 via-teal-600 to-emerald-600 dark:from-cyan-400 dark:via-teal-400 dark:to-emerald-300 bg-clip-text text-transparent drop-shadow-sm">
                   H
                 </span>
                 <motion.span
@@ -201,73 +250,61 @@ export function DynamicIdentityHero() {
                   animate={{
                     opacity: isCollapsed ? 0 : 1,
                     maxWidth: isCollapsed ? "0px" : "160px",
-                    letterSpacing: isCollapsed ? "-0.2em" : "0em",
+                    letterSpacing: isCollapsed ? "-0.25em" : "0.02em",
                   }}
-                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-                  className="font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight text-slate-800 dark:text-slate-100 whitespace-nowrap overflow-hidden inline-block"
+                  transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+                  className="font-black text-3xl sm:text-4xl md:text-5xl tracking-tight text-slate-800 dark:text-slate-100 uppercase whitespace-nowrap overflow-hidden inline-block"
                 >
                   eras
                 </motion.span>
               </div>
             </motion.div>
-          ) : (
-            /* =========================================================================
-               PHASE B: Unified Official AMH Favicon / Logo as Central Title Anchor
-               ========================================================================= */
+          )}
+
+          {/* =========================================================================
+              PHASE 3: AMH Favicon Emerges from Parted Nebula Cloud
+             ========================================================================= */}
+          {isSettled && (
             <motion.div
-              key="settled-logo-container"
-              initial={{ scale: 0.75, opacity: 0, y: 10 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
+              key="settled-logo"
+              initial={{ scale: 0.7, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               transition={{
                 type: "spring",
-                stiffness: 260,
-                damping: 20,
+                stiffness: 240,
+                damping: 18,
               }}
-              className="relative flex flex-col items-center justify-center group"
+              className="relative flex items-center justify-center group"
             >
-              {/* Luminous Organic Glow Behind Logo */}
-              <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-violet-500/25 via-blue-500/25 to-teal-400/25 blur-2xl opacity-75 dark:opacity-90 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              {/* Luminous Core Backdrop Halo */}
+              <div className="absolute -inset-3 rounded-3xl bg-gradient-to-r from-violet-500/20 via-blue-500/20 to-teal-400/20 blur-xl opacity-80 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-              {/* Central Official AMH Logo Favicon Badge */}
-              <div className="relative flex h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 items-center justify-center rounded-3xl border border-violet-200/90 dark:border-cyan-500/30 bg-white/95 dark:bg-slate-900/95 shadow-xl shadow-violet-500/10 dark:shadow-[0_15px_40px_rgba(6,182,212,0.15)] backdrop-blur-md overflow-hidden transform-gpu transition-transform duration-300 group-hover:scale-105">
+              {/* Centered AMH Favicon Card Badge */}
+              <div className="relative flex h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 items-center justify-center rounded-3xl border border-slate-200/90 dark:border-cyan-500/30 bg-white/95 dark:bg-slate-900/95 shadow-xl shadow-violet-500/10 dark:shadow-[0_15px_40px_rgba(6,182,212,0.15)] backdrop-blur-md overflow-hidden transform-gpu transition-transform duration-300 group-hover:scale-105">
                 <Image
-                  src="/logo-amh.png"
-                  alt="Abraham Martín Heras AMH Logo"
+                  src="/logo-amh-cropped.png"
+                  alt="Abraham Martín Heras AMH Favicon"
                   width={128}
                   height={128}
-                  className="h-full w-full object-contain p-2"
+                  className="h-full w-full object-contain p-1"
                   priority
                 />
-
-                {/* Subtle Iridescent Border Ring */}
-                <div className="absolute inset-0 rounded-3xl border border-white/60 dark:border-white/10 pointer-events-none" />
               </div>
-
-              {/* Status Pill on Settled Logo */}
-              <motion.div
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="mt-3.5 inline-flex items-center gap-1.5 rounded-full border border-violet-200/80 dark:border-cyan-500/30 bg-white/80 dark:bg-slate-950/80 px-3 py-0.5 text-[11px] font-mono font-semibold text-slate-800 dark:text-slate-200 shadow-2xs"
-              >
-                <Sparkles className="h-3 w-3 text-cyan-500 animate-pulse" />
-                <span className="tracking-wide">AMH · LOGO IDENTIDAD</span>
-              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Discreet Interactive Controls Toolbar (Sound & Replay) */}
-        <div className="mt-4 flex items-center justify-center gap-2">
+        <div className="mt-5 flex items-center justify-center gap-2">
           {/* Replay Button */}
           <button
             type="button"
             onClick={handleReplay}
             title={isEs ? "Repetir animación de formación" : "Replay formation animation"}
-            className="group flex items-center gap-1.5 rounded-full border border-slate-200/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md px-3 py-1 text-xs font-medium text-slate-700 dark:text-slate-300 hover:border-violet-400 dark:hover:border-cyan-400 hover:text-violet-700 dark:hover:text-cyan-300 transition-all cursor-pointer shadow-2xs"
+            className="group flex items-center gap-1.5 rounded-full border border-slate-200/80 dark:border-white/10 bg-white/75 dark:bg-slate-900/75 backdrop-blur-md px-3 py-1 text-xs font-medium text-slate-700 dark:text-slate-300 hover:border-violet-400 dark:hover:border-cyan-400 hover:text-violet-700 dark:hover:text-cyan-300 transition-all cursor-pointer shadow-2xs"
           >
             <RotateCcw className="h-3 w-3 text-slate-500 dark:text-slate-400 group-hover:rotate-180 transition-transform duration-500" />
-            <span className="text-[11px]">{isEs ? "Repetir Formación" : "Replay Formation"}</span>
+            <span className="text-[11px] font-sans">{isEs ? "Repetir Formación" : "Replay Formation"}</span>
           </button>
 
           {/* Sound Toggle Button */}
@@ -277,19 +314,19 @@ export function DynamicIdentityHero() {
             title={isMuted ? (isEs ? "Activar sonido" : "Unmute sound") : (isEs ? "Silenciar" : "Mute")}
             className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all cursor-pointer shadow-2xs ${
               isMuted
-                ? "border-slate-200/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/70 text-slate-500 dark:text-slate-400"
-                : "border-cyan-300/80 dark:border-cyan-500/40 bg-cyan-50/70 dark:bg-cyan-950/50 text-cyan-800 dark:text-cyan-300"
+                ? "border-slate-200/80 dark:border-white/10 bg-white/75 dark:bg-slate-900/75 text-slate-500 dark:text-slate-400"
+                : "border-cyan-300/80 dark:border-cyan-500/40 bg-cyan-50/80 dark:bg-cyan-950/50 text-cyan-800 dark:text-cyan-300"
             }`}
           >
             {isMuted ? (
               <>
                 <VolumeX className="h-3 w-3 text-slate-400" />
-                <span className="text-[11px]">{isEs ? "Sin sonido" : "Muted"}</span>
+                <span className="text-[11px] font-sans">{isEs ? "Sin sonido" : "Muted"}</span>
               </>
             ) : (
               <>
                 <Volume2 className="h-3 w-3 text-cyan-600 dark:text-cyan-400 animate-pulse" />
-                <span className="text-[11px]">{isEs ? "Sonido ON" : "Sound ON"}</span>
+                <span className="text-[11px] font-sans">{isEs ? "Sonido ON" : "Sound ON"}</span>
               </>
             )}
           </button>
