@@ -168,7 +168,7 @@ ${languages
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-xl border border-slate-300 overflow-hidden shrink-0 shadow-xs">
                 <Image
-                  src="/logo-amh.png"
+                  src="/amh-logo-card.png"
                   alt="Abraham Martín Heras AMH"
                   width={48}
                   height={48}

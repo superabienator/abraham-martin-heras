@@ -15,11 +15,12 @@ export function DynamicIdentityHero() {
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+  const startTimeRef = useRef<number>(0);
 
-  // Sound playback helper: starts immediately from 0.0s
-  const playAudio = useCallback(() => {
+  // Sound playback helper: starts synchronized from given offset (or 0.0s)
+  const playAudio = useCallback((offsetSeconds = 0) => {
     if (audioRef.current && !isMuted) {
-      audioRef.current.currentTime = 0;
+      audioRef.current.currentTime = Math.max(0, offsetSeconds);
       audioRef.current.volume = 0.85;
       audioRef.current.play().then(() => {
         setAudioUnlocked(true);
@@ -35,13 +36,16 @@ export function DynamicIdentityHero() {
     timeoutsRef.current = [];
   };
 
-  // Replay sequence: starts sound and animation from second 0.0s simultaneously
+  // Replay sequence: starts sound and animation simultaneously from 0.0s
   const handleReplay = useCallback(() => {
     clearTimers();
+    if (typeof window !== "undefined") {
+      startTimeRef.current = performance.now();
+    }
     setStage("words");
 
     // 0.0s: Start sound immediately with the visual intro
-    playAudio();
+    playAudio(0);
 
     // 1.8s: Suffixes gently dissolve while preserving full word legibility
     const t1 = setTimeout(() => {
@@ -58,7 +62,7 @@ export function DynamicIdentityHero() {
       setStage("nebula");
     }, 3400);
 
-    // 4.3s: Cloud clears, revealing the pristine AMH Logo Favicon
+    // 4.3s: Cloud clears, revealing the user's original AMH Logo
     const t4 = setTimeout(() => {
       setStage("settled");
     }, 4300);
@@ -66,9 +70,10 @@ export function DynamicIdentityHero() {
     timeoutsRef.current = [t1, t2, t3, t4];
   }, [playAudio]);
 
-  // Initial progression on mount: start audio immediately at 0.0s
+  // Initial progression on mount: attempt immediate sound playback at 0.0s
   useEffect(() => {
-    playAudio();
+    startTimeRef.current = performance.now();
+    playAudio(0);
 
     const t1 = setTimeout(() => {
       setStage("collapsing");
@@ -96,21 +101,42 @@ export function DynamicIdentityHero() {
     };
   }, [playAudio]);
 
-  // Unlock audio on first gesture if browser blocked initial autoplay
+  // Natural gesture unlock: any micro-movement (mouse move, hover, scroll, touch)
+  // immediately activates and synchronizes the audio if browser blocked initial autoplay
   useEffect(() => {
-    const unlockOnGesture = () => {
-      if (!audioUnlocked && audioRef.current) {
-        audioRef.current.play().then(() => {
-          setAudioUnlocked(true);
-        }).catch(() => {});
+    const unlockOnNaturalGesture = () => {
+      if (audioRef.current && audioRef.current.paused && !isMuted) {
+        const elapsed = (performance.now() - startTimeRef.current) / 1000;
+        if (elapsed < 6) {
+          audioRef.current.currentTime = Math.max(0, elapsed);
+          audioRef.current.play().then(() => {
+            setAudioUnlocked(true);
+          }).catch(() => {});
+        }
       }
-      window.removeEventListener("pointerdown", unlockOnGesture);
     };
-    window.addEventListener("pointerdown", unlockOnGesture, { once: true });
+
+    const naturalEvents = [
+      "pointermove",
+      "mousemove",
+      "pointerenter",
+      "scroll",
+      "wheel",
+      "pointerdown",
+      "touchstart",
+      "keydown",
+    ];
+
+    naturalEvents.forEach((ev) =>
+      window.addEventListener(ev, unlockOnNaturalGesture, { passive: true, once: true })
+    );
+
     return () => {
-      window.removeEventListener("pointerdown", unlockOnGesture);
+      naturalEvents.forEach((ev) =>
+        window.removeEventListener(ev, unlockOnNaturalGesture)
+      );
     };
-  }, [audioUnlocked]);
+  }, [isMuted]);
 
   const toggleSound = () => {
     if (isMuted) {
@@ -138,7 +164,7 @@ export function DynamicIdentityHero() {
       {/* Hidden audio element loading the formation sound track */}
       <audio
         ref={audioRef}
-        src="/amh-formation.mp4"
+        src="/amh-audio.mp4"
         preload="auto"
         muted={isMuted}
       />
@@ -148,7 +174,7 @@ export function DynamicIdentityHero() {
         
         {/* =========================================================================
             CHROMATIC NEBULA CLOUD (Nube de Color Cósmica)
-            Erupts at the collision center and parts to reveal the new AMH Favicon
+            Erupts at the collision center and parts to reveal the user's original AMH Logo
            ========================================================================= */}
         <AnimatePresence>
           {(isCloudActive || isSettled) && (
@@ -270,7 +296,7 @@ export function DynamicIdentityHero() {
           )}
 
           {/* =========================================================================
-              PHASE 3: Newly Generated Vector AMH Favicon Emerges from Parted Nebula
+              PHASE 3: User's Original AMH Logo Emerges from Parted Nebula
              ========================================================================= */}
           {isSettled && (
             <motion.div
@@ -287,11 +313,11 @@ export function DynamicIdentityHero() {
               {/* Luminous Organic Glow Behind Logo */}
               <div className="absolute -inset-3 rounded-3xl bg-gradient-to-r from-violet-500/25 via-blue-500/25 to-teal-400/25 blur-xl opacity-80 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-              {/* Centered Modern Vector AMH Favicon Card Badge */}
+              {/* Centered User's Original AMH Logo Card Badge */}
               <div className="relative flex h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 items-center justify-center rounded-3xl border border-slate-200/90 dark:border-cyan-500/30 bg-white/95 dark:bg-slate-900/95 shadow-xl shadow-violet-500/10 dark:shadow-[0_15px_40px_rgba(6,182,212,0.15)] backdrop-blur-md overflow-hidden transform-gpu transition-transform duration-300 group-hover:scale-105">
                 <Image
-                  src="/logo-amh.png"
-                  alt="Abraham Martín Heras AMH Favicon"
+                  src="/amh-logo-card.png"
+                  alt="Abraham Martín Heras AMH Logo"
                   width={128}
                   height={128}
                   className="h-full w-full object-contain p-1"

@@ -232,7 +232,7 @@ export function CvChat() {
         <div className="flex items-center gap-3">
           <div className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-violet-200 dark:border-cyan-500/30 overflow-hidden shadow-sm shrink-0 bg-white dark:bg-slate-800">
             <Image
-              src="/logo-amh.png"
+              src="/amh-logo-card.png"
               alt="Abraham Martín Heras AMH"
               width={36}
               height={36}
@@ -289,7 +289,7 @@ export function CvChat() {
               {isAssistant && (
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-violet-200 dark:border-cyan-500/30 overflow-hidden shrink-0 mt-0.5 bg-white dark:bg-slate-900 shadow-2xs">
                   <Image
-                    src="/logo-amh.png"
+                    src="/amh-logo-card.png"
                     alt="AMH"
                     width={28}
                     height={28}

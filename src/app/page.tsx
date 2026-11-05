@@ -93,7 +93,7 @@ export default function HomePage() {
           <div className="flex items-center gap-3 shrink-0">
             <div className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-violet-300/80 dark:border-cyan-400/50 bg-white/90 dark:bg-slate-900/90 shadow-2xs shrink-0 overflow-hidden">
               <Image
-                src="/logo-amh.png"
+                src="/amh-logo-card.png"
                 alt="AMH"
                 width={32}
                 height={32}
@@ -604,7 +604,7 @@ export default function HomePage() {
           <div className="flex items-center gap-3.5">
             <div className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/90 dark:border-white/10 bg-white/90 dark:bg-slate-900/90 shadow-xs shrink-0 overflow-hidden">
               <Image
-                src="/logo-amh.png"
+                src="/amh-logo-card.png"
                 alt="AMH"
                 width={40}
                 height={40}
