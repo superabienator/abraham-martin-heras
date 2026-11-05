@@ -21,6 +21,15 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://abraham-martin-heras.dev"),
   title: `${cvData.profile.name} | Full Stack AI · Automatización de Procesos`,
   description: cvData.profile.tagline,
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   keywords: [
     "Abraham Martín Heras",
     "Full Stack AI",
@@ -45,11 +54,20 @@ export const metadata: Metadata = {
     title: `${cvData.profile.name} | Full Stack AI & Operational Automation`,
     description: cvData.profile.tagline,
     siteName: `${cvData.profile.name} Portfolio`,
+    images: [
+      {
+        url: "/logo-amh.png",
+        width: 1024,
+        height: 1024,
+        alt: `${cvData.profile.name} · AMH Identity Logo`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${cvData.profile.name} | Full Stack AI & Process Automation`,
     description: cvData.profile.tagline,
+    images: ["/logo-amh.png"],
   },
   robots: {
     index: true,

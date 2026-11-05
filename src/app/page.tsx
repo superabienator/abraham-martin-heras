@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useLanguage } from "@/context/language-context";
 import { type BentoCategory, type SocialLink, type TimelineEntry } from "@/data/cv-data";
 import { PlaygroundTabs } from "@/components/PlaygroundTabs";
@@ -11,6 +12,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LanguageToggle } from "@/components/ui/language-toggle";
 import { HeaderReveal, EditorialReveal } from "@/components/ui/editorial-reveal";
 import { CertificationsCylinder } from "@/components/ui/certifications-cylinder";
+import { GenesisBanner } from "@/components/ui/genesis-banner";
 import {
   Bot,
   Workflow,
@@ -89,8 +91,15 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           {/* Zona 1: Identidad (Izquierda) */}
           <div className="flex items-center gap-3 shrink-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-violet-300/80 dark:border-cyan-400/50 bg-holographic-pill font-mono text-xs font-bold text-slate-900 dark:text-white shadow-2xs shrink-0">
-              AI
+            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-violet-300/80 dark:border-cyan-400/50 bg-white/90 dark:bg-slate-900/90 shadow-2xs shrink-0 overflow-hidden">
+              <Image
+                src="/logo-amh.png"
+                alt="AMH"
+                width={32}
+                height={32}
+                className="h-full w-full object-cover"
+                priority
+              />
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold tracking-tight text-slate-900 dark:text-white whitespace-nowrap">
@@ -151,7 +160,12 @@ export default function HomePage() {
         </div>
       </HeaderReveal>
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-24 py-12 sm:py-20">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-20 py-8 sm:py-14">
+        {/* =====================================================================
+            0. WELCOME LOGO FORMATION BANNER (Ultra-Achatado & Encuadre Técnico)
+        ===================================================================== */}
+        <GenesisBanner />
+
         {/* =====================================================================
             1. HERO SECTION (Luminous Holographic & Kinetic Editorial)
         ===================================================================== */}
@@ -587,15 +601,26 @@ export default function HomePage() {
       {/* Footer Ejecutivo y Saneado (Cero fugas técnicas) */}
       <footer className="border-t border-slate-200/80 dark:border-white/10 bg-white/75 dark:bg-slate-950/75 backdrop-blur-md transform-gpu py-10 mt-20 transition-colors duration-300">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1.5 text-center md:text-left">
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5">
-              <span className="font-bold text-slate-900 dark:text-white">{profile.name}</span>
-              <span className="text-slate-400">•</span>
-              <span className="text-xs text-slate-600 dark:text-slate-400">{profile.role}</span>
+          <div className="flex items-center gap-3.5">
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/90 dark:border-white/10 bg-white/90 dark:bg-slate-900/90 shadow-xs shrink-0 overflow-hidden">
+              <Image
+                src="/logo-amh.png"
+                alt="AMH"
+                width={40}
+                height={40}
+                className="h-full w-full object-cover"
+              />
             </div>
-            <div className="flex items-center justify-center md:justify-start gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>{profile.availabilityBadge.statusText}</span>
+            <div className="space-y-1 text-center md:text-left">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                <span className="font-bold text-slate-900 dark:text-white">{profile.name}</span>
+                <span className="text-slate-400">•</span>
+                <span className="text-xs text-slate-600 dark:text-slate-400">{profile.role}</span>
+              </div>
+              <div className="flex items-center justify-center md:justify-start gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>{profile.availabilityBadge.statusText}</span>
+              </div>
             </div>
           </div>
 

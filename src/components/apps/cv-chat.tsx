@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import Image from "next/image";
 import { useLanguage } from "@/context/language-context";
 import {
   Send,
   RotateCcw,
-  Bot,
   User,
   Sparkles,
   CheckCircle2,
@@ -230,8 +230,14 @@ export function CvChat() {
       {/* 1. Cabecera del Agente de Entrevista */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white/80 dark:bg-slate-900/80 p-3.5 rounded-xl border border-slate-200/80 dark:border-white/10">
         <div className="flex items-center gap-3">
-          <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-violet-500 via-indigo-500 to-cyan-500 text-white shadow-sm shrink-0">
-            <Bot className="h-5 w-5" />
+          <div className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-violet-200 dark:border-cyan-500/30 overflow-hidden shadow-sm shrink-0 bg-white dark:bg-slate-800">
+            <Image
+              src="/logo-amh.png"
+              alt="Abraham Martín Heras AMH"
+              width={36}
+              height={36}
+              className="h-full w-full object-cover"
+            />
             <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white dark:border-slate-900" />
@@ -281,8 +287,14 @@ export function CvChat() {
               }`}
             >
               {isAssistant && (
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-100 dark:bg-cyan-950/80 text-violet-700 dark:text-cyan-400 border border-violet-200 dark:border-cyan-500/30 shrink-0 mt-0.5">
-                  <Sparkles className="h-3.5 w-3.5" />
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-violet-200 dark:border-cyan-500/30 overflow-hidden shrink-0 mt-0.5 bg-white dark:bg-slate-900 shadow-2xs">
+                  <Image
+                    src="/logo-amh.png"
+                    alt="AMH"
+                    width={28}
+                    height={28}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
               )}
 

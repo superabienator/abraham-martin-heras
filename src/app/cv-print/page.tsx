@@ -1,6 +1,7 @@
 "use client";
 
 import React, { Suspense, useState } from "react";
+import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getCVData, type LanguageSkill } from "@/data/cv-data";
 import { Printer, ArrowLeft, Globe, Copy, Check, ShieldCheck, Mail, MapPin, Award } from "lucide-react";
@@ -163,14 +164,25 @@ ${languages
       >
         {/* 1. CABECERA EJECUTIVA */}
         <header className="border-b-2 border-slate-900 pb-4 mb-5">
-          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950 uppercase">
-                {profile.name}
-              </h1>
-              <p className="text-sm sm:text-base font-bold text-violet-900 dark:text-slate-800 mt-0.5">
-                {profile.role}
-              </p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl border border-slate-300 overflow-hidden shrink-0 shadow-xs">
+                <Image
+                  src="/logo-amh.png"
+                  alt="Abraham Martín Heras AMH"
+                  width={48}
+                  height={48}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950 uppercase">
+                  {profile.name}
+                </h1>
+                <p className="text-sm sm:text-base font-bold text-violet-900 mt-0.5">
+                  {profile.role}
+                </p>
+              </div>
             </div>
             <div className="text-right text-xs text-slate-600 font-mono">
               <span className="inline-flex items-center gap-1 font-semibold text-emerald-800">
