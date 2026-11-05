@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="deep-space"], [data-theme="deep-space"] *, .dark, .dark *));
+
+:root {
+  --background: #F6F7FB;
+  --foreground: #0f172a;
+  --grid-line: rgba(15, 23, 42, 0.038);
+  --holo-cyan: #06b6d4;
+  --holo-violet: #8b5cf6;
+  --holo-mint: #10b981;
+  --holo-coral: #fb7185;
+}
+
+[data-theme="deep-space"],
+.dark {
+  --background: #0B0F19;
+  --foreground: #f8fafc;
+  --grid-line: rgba(255, 255, 255, 0.035);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-behavior: smooth;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+/* ============================================================================
+   Holographic & Iridescent Utilities (Awwwards / Kinetic Editorial Style)
+   ============================================================================ */
+
+.text-holographic {
+  background-image: linear-gradient(
+    115deg,
+    #0891b2 0%,
+    #7c3aed 34%,
+    #059669 68%,
+    #e11d48 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: holo-shift 8s ease-in-out infinite alternate;
+}
+
+[data-theme="deep-space"] .text-holographic,
+.dark .text-holographic {
+  background-image: linear-gradient(
+    115deg,
+    #38bdf8 0%,
+    #a78bfa 34%,
+    #34d399 68%,
+    #fb7185 100%
+  );
+}
+
+.bg-holographic-pill {
+  background-image: linear-gradient(
+    120deg,
+    rgba(6, 182, 212, 0.14) 0%,
+    rgba(139, 92, 246, 0.14) 38%,
+    rgba(16, 185, 129, 0.14) 72%,
+    rgba(251, 113, 133, 0.14) 100%
+  );
+}
+
+[data-theme="deep-space"] .bg-holographic-pill,
+.dark .bg-holographic-pill {
+  background-image: linear-gradient(
+    120deg,
+    rgba(56, 189, 248, 0.18) 0%,
+    rgba(167, 139, 250, 0.18) 38%,
+    rgba(52, 211, 153, 0.18) 72%,
+    rgba(251, 113, 133, 0.18) 100%
+  );
+}
+
+.bg-editorial-grid {
+  background-size: 44px 44px;
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+}
+
+/* GPU-accelerated ambient halo loops (60 FPS) */
+@keyframes holo-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes float-halo-cyan {
+  0%, 100% {
+    transform: translate3d(0px, 0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate3d(65px, -40px, 0px) scale(1.08);
+  }
+  66% {
+    transform: translate3d(-45px, 35px, 0px) scale(0.95);
+  }
+}
+
+@keyframes float-halo-lavender {
+  0%, 100% {
+    transform: translate3d(0px, 0px, 0px) scale(1);
+  }
+  40% {
+    transform: translate3d(-70px, 50px, 0px) scale(1.1);
+  }
+  75% {
+    transform: translate3d(50px, -35px, 0px) scale(0.94);
+  }
+}
+
+@keyframes float-halo-mint {
+  0%, 100% {
+    transform: translate3d(0px, 0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate3d(55px, 45px, 0px) scale(1.07);
+  }
+}
+
+.animate-halo-cyan {
+  animation: float-halo-cyan 22s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-halo-lavender {
+  animation: float-halo-lavender 26s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-halo-mint {
+  animation: float-halo-mint 24s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ============================================================================
+   GPU Layer Pre-warming & Layout Containment (60 FPS First-Scroll Optimization)
+   ============================================================================ */
+
+.gpu-layer {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Contención de Layout en secciones críticas para evitar Layout Shifts durante el scroll */
+#bento-skills,
+#playground,
+#timeline {
+  contain: layout style;
+}
