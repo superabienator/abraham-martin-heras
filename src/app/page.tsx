@@ -12,7 +12,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LanguageToggle } from "@/components/ui/language-toggle";
 import { HeaderReveal, EditorialReveal } from "@/components/ui/editorial-reveal";
 import { CertificationsCylinder } from "@/components/ui/certifications-cylinder";
-import { GenesisBanner } from "@/components/ui/genesis-banner";
+import { DynamicIdentityHero } from "@/components/ui/dynamic-identity-hero";
 import {
   Bot,
   Workflow,
@@ -160,11 +160,11 @@ export default function HomePage() {
         </div>
       </HeaderReveal>
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-20 py-8 sm:py-14">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-16 py-6 sm:py-10">
         {/* =====================================================================
-            0. WELCOME LOGO FORMATION BANNER (Ultra-Achatado & Encuadre Técnico)
+            0. DYNAMIC AMH IDENTITY FORMATION (Kinetic Typography & Audio Fusion)
         ===================================================================== */}
-        <GenesisBanner />
+        <DynamicIdentityHero />
 
         {/* =====================================================================
             1. HERO SECTION (Luminous Holographic & Kinetic Editorial)
