@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/context/language-context";
 import { type BentoCategory, type SocialLink, type TimelineEntry } from "@/data/cv-data";
@@ -77,6 +78,19 @@ function renderTimelineIcon(type: TimelineEntry["type"]) {
 export default function HomePage() {
   const { cv, language, t } = useLanguage();
   const { profile, bentoCategories, languages, certifications, playgroundTabs, timeline } = cv;
+
+  // Garantizar que la recarga de página (F5) NUNCA salte al medio de la web ni a submenús residuales
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "manual";
+      }
+      if (window.location.hash) {
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+      window.scrollTo(0, 0);
+    }
+  }, []);
 
   const githubSocial = profile.socials.find((s) => s.id === "github") ?? profile.socials[0];
   const linkedinSocial = profile.socials.find((s) => s.id === "linkedin") ?? profile.socials[1];

@@ -12,138 +12,133 @@ export function DynamicIdentityHero() {
   const { language } = useLanguage();
   const [stage, setStage] = useState<AnimationStage>("words");
   const [isMuted, setIsMuted] = useState(false);
-  const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
-  const startTimeRef = useRef<number>(0);
+  const timerRafRef = useRef<number | null>(null);
+  const fallbackStartRef = useRef<number>(0);
 
-  // Sound playback helper: starts synchronized from given offset (or 0.0s)
-  const playAudio = useCallback((offsetSeconds = 0) => {
-    if (audioRef.current && !isMuted) {
-      audioRef.current.currentTime = Math.max(0, offsetSeconds);
-      audioRef.current.volume = 0.85;
-      audioRef.current.play().then(() => {
-        setAudioUnlocked(true);
-      }).catch(() => {
-        // Autoplay policy prevented playback until user interaction
-        setAudioUnlocked(false);
-      });
-    }
-  }, [isMuted]);
-
-  const clearTimers = () => {
-    timeoutsRef.current.forEach(clearTimeout);
-    timeoutsRef.current = [];
-  };
-
-  // Replay sequence: starts sound and animation simultaneously from 0.0s
-  const handleReplay = useCallback(() => {
-    clearTimers();
-    if (typeof window !== "undefined") {
-      startTimeRef.current = performance.now();
-    }
-    setStage("words");
-
-    // 0.0s: Start sound immediately with the visual intro
-    playAudio(0);
-
-    // 1.8s: Suffixes gently dissolve while preserving full word legibility
-    const t1 = setTimeout(() => {
+  // Derive visual stage from exact time in seconds
+  const updateStageFromTime = useCallback((t: number) => {
+    if (t < 1.8) {
+      setStage("words");
+    } else if (t < 2.7) {
       setStage("collapsing");
-    }, 1800);
-
-    // 2.7s: Initials slide inwards towards center
-    const t2 = setTimeout(() => {
+    } else if (t < 3.4) {
       setStage("converging");
-    }, 2700);
-
-    // 3.4s: Chromatic Nebula Cloud erupts at audio impact
-    const t3 = setTimeout(() => {
+    } else if (t < 4.3) {
       setStage("nebula");
-    }, 3400);
-
-    // 4.3s: Cloud clears, revealing the user's original AMH Logo
-    const t4 = setTimeout(() => {
+    } else {
       setStage("settled");
-    }, 4300);
+    }
+  }, []);
 
-    timeoutsRef.current = [t1, t2, t3, t4];
-  }, [playAudio]);
-
-  // Initial progression on mount: attempt immediate sound playback at 0.0s
-  useEffect(() => {
-    startTimeRef.current = performance.now();
-    playAudio(0);
-
-    const t1 = setTimeout(() => {
-      setStage("collapsing");
-    }, 1800);
-
-    const t2 = setTimeout(() => {
-      setStage("converging");
-    }, 2700);
-
-    const t3 = setTimeout(() => {
-      setStage("nebula");
-    }, 3400);
-
-    const t4 = setTimeout(() => {
-      setStage("settled");
-    }, 4300);
-
-    timeoutsRef.current = [t1, t2, t3, t4];
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
+  // Fallback timer loop when audio is muted or blocked by browser policy
+  const runFallbackLoop = useCallback(() => {
+    if (timerRafRef.current) cancelAnimationFrame(timerRafRef.current);
+    const loop = () => {
+      if (typeof window === "undefined") return;
+      const elapsed = (performance.now() - fallbackStartRef.current) / 1000;
+      updateStageFromTime(elapsed);
+      if (elapsed < 4.8) {
+        timerRafRef.current = requestAnimationFrame(loop);
+      } else {
+        setStage("settled");
+      }
     };
-  }, [playAudio]);
+    timerRafRef.current = requestAnimationFrame(loop);
+  }, [updateStageFromTime]);
 
-  // Natural gesture unlock: any micro-movement (mouse move, hover, scroll, touch)
-  // immediately activates and synchronizes the audio if browser blocked initial autoplay
+  // Attempt to start audio playback from beginning
+  const startAudio = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isMuted) {
+      fallbackStartRef.current = performance.now();
+      runFallbackLoop();
+      return;
+    }
+
+    audio.currentTime = 0;
+    audio.volume = 0.85;
+
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setAutoplayBlocked(false);
+        })
+        .catch(() => {
+          // Browser Autoplay Policy blocked audio until a real user gesture
+          setAutoplayBlocked(true);
+          // Run visual progression smoothly anyway so screen is never frozen
+          fallbackStartRef.current = performance.now();
+          runFallbackLoop();
+        });
+    }
+  }, [isMuted, runFallbackLoop]);
+
+  // Replay sequence triggered by user
+  const handleReplay = useCallback(() => {
+    setStage("words");
+    setAutoplayBlocked(false);
+    startAudio();
+  }, [startAudio]);
+
+  // Start sequence on initial mount
   useEffect(() => {
-    const unlockOnNaturalGesture = () => {
-      if (audioRef.current && audioRef.current.paused && !isMuted) {
-        const elapsed = (performance.now() - startTimeRef.current) / 1000;
-        if (elapsed < 6) {
-          audioRef.current.currentTime = Math.max(0, elapsed);
-          audioRef.current.play().then(() => {
-            setAudioUnlocked(true);
-          }).catch(() => {});
-        }
+    startAudio();
+    return () => {
+      if (timerRafRef.current) cancelAnimationFrame(timerRafRef.current);
+    };
+  }, [startAudio]);
+
+  // If autoplay was initially blocked by Chrome/Safari, listen for the FIRST user gesture
+  // (click, touch, keypress) to instantly unlock and synchronize audio with zero friction
+  useEffect(() => {
+    if (!autoplayBlocked) return;
+
+    const unlockOnGesture = () => {
+      const audio = audioRef.current;
+      if (audio && audio.paused && !isMuted) {
+        audio.currentTime = 0;
+        audio.play().then(() => {
+          setAutoplayBlocked(false);
+          setStage("words");
+        }).catch(() => {});
       }
     };
 
-    const naturalEvents = [
-      "pointermove",
-      "mousemove",
-      "pointerenter",
-      "scroll",
-      "wheel",
-      "pointerdown",
-      "touchstart",
-      "keydown",
-    ];
-
-    naturalEvents.forEach((ev) =>
-      window.addEventListener(ev, unlockOnNaturalGesture, { passive: true, once: true })
-    );
+    const gestureEvents = ["pointerdown", "touchstart", "click", "keydown"];
+    gestureEvents.forEach((ev) => window.addEventListener(ev, unlockOnGesture, { once: true }));
 
     return () => {
-      naturalEvents.forEach((ev) =>
-        window.removeEventListener(ev, unlockOnNaturalGesture)
-      );
+      gestureEvents.forEach((ev) => window.removeEventListener(ev, unlockOnGesture));
     };
-  }, [isMuted]);
+  }, [autoplayBlocked, isMuted]);
+
+  // Synchronize visual stage directly from the audio element's own timeupdate event!
+  // This guarantees 0ms drift / mathematically impossible to desynchronize!
+  const handleAudioTimeUpdate = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    updateStageFromTime(audio.currentTime);
+  };
+
+  const handleAudioEnded = () => {
+    setStage("settled");
+  };
 
   const toggleSound = () => {
     if (isMuted) {
       setIsMuted(false);
       if (audioRef.current) {
         audioRef.current.muted = false;
-        audioRef.current.play().catch(() => {});
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().then(() => {
+          setAutoplayBlocked(false);
+        }).catch(() => {});
       }
     } else {
       setIsMuted(true);
@@ -161,12 +156,14 @@ export function DynamicIdentityHero() {
 
   return (
     <section aria-label="AMH Identity Formation" className="relative w-full pt-4 pb-6 flex flex-col items-center justify-center text-center">
-      {/* Hidden audio element loading the formation sound track */}
+      {/* Hidden audio element tied 1:1 to visual stage progression */}
       <audio
         ref={audioRef}
         src="/amh-audio.mp4"
         preload="auto"
         muted={isMuted}
+        onTimeUpdate={handleAudioTimeUpdate}
+        onEnded={handleAudioEnded}
       />
 
       {/* Main Kinetic Stage: Centered Formation Canvas */}
@@ -341,18 +338,25 @@ export function DynamicIdentityHero() {
             <span className="text-[11px] font-sans">{isEs ? "Repetir Formación" : "Replay Formation"}</span>
           </button>
 
-          {/* Sound Toggle Button */}
+          {/* Sound Toggle Button (Pulses if browser blocked cold autoplay to invite user to activate sound) */}
           <button
             type="button"
             onClick={toggleSound}
             title={isMuted ? (isEs ? "Activar sonido" : "Unmute sound") : (isEs ? "Silenciar" : "Mute")}
             className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all cursor-pointer shadow-2xs ${
-              isMuted
+              autoplayBlocked
+                ? "border-violet-400/90 dark:border-cyan-400/80 bg-violet-50/90 dark:bg-cyan-950/70 text-violet-800 dark:text-cyan-200 animate-bounce"
+                : isMuted
                 ? "border-slate-200/80 dark:border-white/10 bg-white/75 dark:bg-slate-900/75 text-slate-500 dark:text-slate-400"
                 : "border-cyan-300/80 dark:border-cyan-500/40 bg-cyan-50/80 dark:bg-cyan-950/50 text-cyan-800 dark:text-cyan-300"
             }`}
           >
-            {isMuted ? (
+            {autoplayBlocked ? (
+              <>
+                <Volume2 className="h-3 w-3 text-violet-600 dark:text-cyan-400" />
+                <span className="text-[11px] font-sans font-semibold">{isEs ? "Activar Sonido" : "Enable Sound"}</span>
+              </>
+            ) : isMuted ? (
               <>
                 <VolumeX className="h-3 w-3 text-slate-400" />
                 <span className="text-[11px] font-sans">{isEs ? "Sin sonido" : "Muted"}</span>
