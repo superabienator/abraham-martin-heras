@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/context/language-context";
-import { Volume2, VolumeX, RotateCcw } from "lucide-react";
+import { Volume2, VolumeX } from "lucide-react";
 
 type AnimationStage = "words" | "collapsing" | "converging" | "nebula" | "settled";
 
@@ -12,7 +12,6 @@ export function DynamicIdentityHero() {
   const { language } = useLanguage();
   const [stage, setStage] = useState<AnimationStage>("words");
   const [isMuted, setIsMuted] = useState(false);
-  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRafRef = useRef<number | null>(null);
@@ -50,11 +49,11 @@ export function DynamicIdentityHero() {
   }, [updateStageFromTime]);
 
   // Attempt to start audio playback from beginning
-  const startAudio = useCallback(() => {
+  const startAudio = useCallback((forceUnmute = false) => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    if (isMuted) {
+    if (isMuted && !forceUnmute) {
       fallbackStartRef.current = performance.now();
       runFallbackLoop();
       return;
@@ -67,24 +66,35 @@ export function DynamicIdentityHero() {
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
-          setAutoplayBlocked(false);
+          setIsMuted(false);
         })
         .catch(() => {
-          // Browser Autoplay Policy blocked audio until a real user gesture
-          setAutoplayBlocked(true);
-          // Run visual progression smoothly anyway so screen is never frozen
+          // Browser Autoplay Policy blocked cold audio: mark as muted and run visuals smoothly
+          setIsMuted(true);
           fallbackStartRef.current = performance.now();
           runFallbackLoop();
         });
     }
   }, [isMuted, runFallbackLoop]);
 
-  // Replay sequence triggered by user
+  // Replay sequence triggered by user (clicking logo)
   const handleReplay = useCallback(() => {
     setStage("words");
-    setAutoplayBlocked(false);
-    startAudio();
-  }, [startAudio]);
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      if (!isMuted) {
+        audio.play().catch(() => {});
+      } else {
+        fallbackStartRef.current = performance.now();
+        runFallbackLoop();
+      }
+    } else {
+      fallbackStartRef.current = performance.now();
+      runFallbackLoop();
+    }
+  }, [isMuted, runFallbackLoop]);
 
   // Start sequence on initial mount
   useEffect(() => {
@@ -94,35 +104,11 @@ export function DynamicIdentityHero() {
     };
   }, [startAudio]);
 
-  // If autoplay was initially blocked by Chrome/Safari, listen for the FIRST user gesture
-  // (click, touch, keypress) to instantly unlock and synchronize audio with zero friction
-  useEffect(() => {
-    if (!autoplayBlocked) return;
-
-    const unlockOnGesture = () => {
-      const audio = audioRef.current;
-      if (audio && audio.paused && !isMuted) {
-        audio.currentTime = 0;
-        audio.play().then(() => {
-          setAutoplayBlocked(false);
-          setStage("words");
-        }).catch(() => {});
-      }
-    };
-
-    const gestureEvents = ["pointerdown", "touchstart", "click", "keydown"];
-    gestureEvents.forEach((ev) => window.addEventListener(ev, unlockOnGesture, { once: true }));
-
-    return () => {
-      gestureEvents.forEach((ev) => window.removeEventListener(ev, unlockOnGesture));
-    };
-  }, [autoplayBlocked, isMuted]);
-
   // Synchronize visual stage directly from the audio element's own timeupdate event!
-  // This guarantees 0ms drift / mathematically impossible to desynchronize!
+  // This guarantees 0ms drift / mathematically locked to the sound
   const handleAudioTimeUpdate = () => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || isMuted) return;
     updateStageFromTime(audio.currentTime);
   };
 
@@ -130,21 +116,23 @@ export function DynamicIdentityHero() {
     setStage("settled");
   };
 
-  const toggleSound = () => {
+  // Minimal circular sound toggle
+  const toggleSound = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const audio = audioRef.current;
     if (isMuted) {
       setIsMuted(false);
-      if (audioRef.current) {
-        audioRef.current.muted = false;
-        audioRef.current.currentTime = 0;
-        audioRef.current.play().then(() => {
-          setAutoplayBlocked(false);
-        }).catch(() => {});
+      if (audio) {
+        audio.muted = false;
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
       }
+      setStage("words");
     } else {
       setIsMuted(true);
-      if (audioRef.current) {
-        audioRef.current.muted = true;
-        audioRef.current.pause();
+      if (audio) {
+        audio.muted = true;
+        audio.pause();
       }
     }
   };
@@ -293,7 +281,7 @@ export function DynamicIdentityHero() {
           )}
 
           {/* =========================================================================
-              PHASE 3: User's Original AMH Logo Emerges from Parted Nebula
+              PHASE 3: User's Original AMH Logo (Click to Replay Animation)
              ========================================================================= */}
           {isSettled && (
             <motion.div
@@ -310,8 +298,13 @@ export function DynamicIdentityHero() {
               {/* Luminous Organic Glow Behind Logo */}
               <div className="absolute -inset-3 rounded-3xl bg-gradient-to-r from-violet-500/25 via-blue-500/25 to-teal-400/25 blur-xl opacity-80 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-              {/* Centered User's Original AMH Logo Card Badge */}
-              <div className="relative flex h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 items-center justify-center rounded-3xl border border-slate-200/90 dark:border-cyan-500/30 bg-white/95 dark:bg-slate-900/95 shadow-xl shadow-violet-500/10 dark:shadow-[0_15px_40px_rgba(6,182,212,0.15)] backdrop-blur-md overflow-hidden transform-gpu transition-transform duration-300 group-hover:scale-105">
+              {/* Centered User's Original AMH Logo Card Badge (Interactive Replay Trigger) */}
+              <button
+                type="button"
+                onClick={handleReplay}
+                title={isEs ? "Haz clic en el logotipo para repetir la animación" : "Click logo to replay animation"}
+                className="relative flex h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 items-center justify-center rounded-3xl border border-slate-200/90 dark:border-cyan-500/30 bg-white/95 dark:bg-slate-900/95 shadow-xl shadow-violet-500/10 dark:shadow-[0_15px_40px_rgba(6,182,212,0.15)] backdrop-blur-md overflow-hidden transform-gpu transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer focus:outline-hidden"
+              >
                 <Image
                   src="/amh-logo-card.png"
                   alt="Abraham Martín Heras AMH Logo"
@@ -320,52 +313,28 @@ export function DynamicIdentityHero() {
                   className="h-full w-full object-contain p-1"
                   priority
                 />
-              </div>
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Discreet Interactive Controls Toolbar (Sound & Replay) */}
-        <div className="mt-5 flex items-center justify-center gap-2">
-          {/* Replay Button */}
-          <button
-            type="button"
-            onClick={handleReplay}
-            title={isEs ? "Repetir animación de formación" : "Replay formation animation"}
-            className="group flex items-center gap-1.5 rounded-full border border-slate-200/80 dark:border-white/10 bg-white/75 dark:bg-slate-900/75 backdrop-blur-md px-3 py-1 text-xs font-medium text-slate-700 dark:text-slate-300 hover:border-violet-400 dark:hover:border-cyan-400 hover:text-violet-700 dark:hover:text-cyan-300 transition-all cursor-pointer shadow-2xs"
-          >
-            <RotateCcw className="h-3 w-3 text-slate-500 dark:text-slate-400 group-hover:rotate-180 transition-transform duration-500" />
-            <span className="text-[11px] font-sans">{isEs ? "Repetir Formación" : "Replay Formation"}</span>
-          </button>
-
-          {/* Sound Toggle Button (Pulses if browser blocked cold autoplay to invite user to activate sound) */}
+        {/* Minimalist Circular Sound Toggle (Speaker Icon: Normal or Strikethrough) */}
+        <div className="mt-4 flex items-center justify-center">
           <button
             type="button"
             onClick={toggleSound}
-            title={isMuted ? (isEs ? "Activar sonido" : "Unmute sound") : (isEs ? "Silenciar" : "Mute")}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all cursor-pointer shadow-2xs ${
-              autoplayBlocked
-                ? "border-violet-400/90 dark:border-cyan-400/80 bg-violet-50/90 dark:bg-cyan-950/70 text-violet-800 dark:text-cyan-200 animate-bounce"
-                : isMuted
-                ? "border-slate-200/80 dark:border-white/10 bg-white/75 dark:bg-slate-900/75 text-slate-500 dark:text-slate-400"
-                : "border-cyan-300/80 dark:border-cyan-500/40 bg-cyan-50/80 dark:bg-cyan-950/50 text-cyan-800 dark:text-cyan-300"
+            title={isMuted ? (isEs ? "Activar sonido" : "Unmute") : (isEs ? "Silenciar" : "Mute")}
+            aria-label={isMuted ? "Unmute sound" : "Mute sound"}
+            className={`flex h-8 w-8 items-center justify-center rounded-full border transition-all cursor-pointer shadow-2xs hover:scale-110 active:scale-90 ${
+              isMuted
+                ? "border-slate-200/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/70 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                : "border-cyan-400/60 dark:border-cyan-500/50 bg-cyan-50/70 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 shadow-sm shadow-cyan-500/10"
             }`}
           >
-            {autoplayBlocked ? (
-              <>
-                <Volume2 className="h-3 w-3 text-violet-600 dark:text-cyan-400" />
-                <span className="text-[11px] font-sans font-semibold">{isEs ? "Activar Sonido" : "Enable Sound"}</span>
-              </>
-            ) : isMuted ? (
-              <>
-                <VolumeX className="h-3 w-3 text-slate-400" />
-                <span className="text-[11px] font-sans">{isEs ? "Sin sonido" : "Muted"}</span>
-              </>
+            {isMuted ? (
+              <VolumeX className="h-4 w-4" />
             ) : (
-              <>
-                <Volume2 className="h-3 w-3 text-cyan-600 dark:text-cyan-400 animate-pulse" />
-                <span className="text-[11px] font-sans">{isEs ? "Sonido ON" : "Sound ON"}</span>
-              </>
+              <Volume2 className="h-4 w-4" />
             )}
           </button>
         </div>
