@@ -48,3 +48,9 @@ next-env.d.ts
 !/cv-inbox/README-INBOX.md
 src/data/cv-data.backup.ts
 *.backup.ts
+
+# Internal preparation & private candidate docs (keep local only)
+INTERVIEW-GUIDE.md
+AUDIT-REPORT.md
+*interview*.md
+*audit*.md
