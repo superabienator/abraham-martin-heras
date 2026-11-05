@@ -96,15 +96,15 @@ export default function HomePage() {
   const linkedinSocial = profile.socials.find((s) => s.id === "linkedin") ?? profile.socials[1];
 
   return (
-    <div className="relative min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    <div className="relative min-h-screen w-full max-w-full overflow-x-clip text-slate-900 dark:text-slate-100 transition-colors duration-300">
       {/* Organic Moving Pastel / Cosmic Halos + Architectural Grid + SVG Noise Overlay */}
       <AmbientCanvas />
 
       {/* Sticky Luminous Glassmorphism Header con Transición Editorial y 3 Zonas Claras */}
       <HeaderReveal className="sticky top-0 z-40 border-b border-slate-200/80 dark:border-white/10 bg-white/75 dark:bg-slate-950/75 backdrop-blur-md transform-gpu transition-colors duration-300">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8">
           {/* Zona 1: Identidad (Izquierda) */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-violet-300/80 dark:border-cyan-400/50 bg-white/90 dark:bg-slate-900/90 shadow-2xs shrink-0 overflow-hidden">
               <Image
                 src="/amh-logo-card.png"
@@ -115,8 +115,8 @@ export default function HomePage() {
                 priority
               />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold tracking-tight text-slate-900 dark:text-white whitespace-nowrap">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-xs sm:text-sm font-bold tracking-tight text-slate-900 dark:text-white truncate max-w-[125px] xs:max-w-[170px] sm:max-w-none">
                 {profile.name}
               </span>
               <span className="hidden xl:inline-block rounded-full border border-slate-200/90 dark:border-white/10 bg-white/90 dark:bg-slate-900/90 px-2 py-0.5 font-mono text-[10px] text-slate-600 dark:text-slate-400 whitespace-nowrap">
@@ -153,10 +153,10 @@ export default function HomePage() {
             </a>
           </nav>
 
-          {/* Zona 3: Acciones, Idioma y Tema (Derecha con separación clara) */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 ml-4 lg:ml-8">
+          {/* Zona 3: Acciones, Idioma y Tema (Derecha compacta y flexible para móvil) */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3 shrink-0 ml-auto pl-2">
             <LanguageToggle />
-            <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
+            <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 hidden xs:block" />
             <ThemeToggle />
 
             <MagneticButton
@@ -164,11 +164,12 @@ export default function HomePage() {
               target="_blank"
               rel="noopener noreferrer"
               strength={0.2}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-violet-300/80 dark:border-cyan-400/40 bg-holographic-pill px-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-white shadow-2xs hover:border-violet-400 dark:hover:border-cyan-300 transition-all whitespace-nowrap"
+              className="inline-flex items-center gap-1 sm:gap-1.5 rounded-xl border border-violet-300/80 dark:border-cyan-400/40 bg-holographic-pill px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-white shadow-2xs hover:border-violet-400 dark:hover:border-cyan-300 transition-all shrink-0"
               title={language === "es" ? "Abrir CV imprimible en PDF (ATS-Friendly)" : "Open printable executive CV (ATS-Friendly)"}
             >
               <Download className="h-3.5 w-3.5 text-violet-700 dark:text-cyan-400 shrink-0" />
-              <span className="whitespace-nowrap">{t.nav.downloadCv}</span>
+              <span className="hidden sm:inline whitespace-nowrap">{t.nav.downloadCv}</span>
+              <span className="sm:hidden text-[11px] font-bold">CV</span>
             </MagneticButton>
           </div>
         </div>

@@ -21,26 +21,26 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       <div className="relative flex items-center">
         {/* Opción Pearl */}
         <div
-          className={`relative z-10 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-200 whitespace-nowrap ${
+          className={`relative z-10 flex items-center gap-1 sm:gap-1.5 rounded-full px-2 sm:px-2.5 py-1 text-xs font-medium transition-colors duration-200 whitespace-nowrap ${
             !isDeepSpace
               ? "text-slate-900 font-semibold"
               : "text-slate-500 hover:text-slate-300"
           }`}
         >
           <SunMedium className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-          <span className="font-mono text-[11px] whitespace-nowrap">Pearl</span>
+          <span className="hidden sm:inline font-mono text-[11px] whitespace-nowrap">Pearl</span>
         </div>
 
         {/* Opción Deep Space */}
         <div
-          className={`relative z-10 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-200 whitespace-nowrap ${
+          className={`relative z-10 flex items-center gap-1 sm:gap-1.5 rounded-full px-2 sm:px-2.5 py-1 text-xs font-medium transition-colors duration-200 whitespace-nowrap ${
             isDeepSpace
               ? "text-white font-semibold"
               : "text-slate-500 hover:text-slate-700"
           }`}
         >
           <MoonStar className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
-          <span className="font-mono text-[11px] whitespace-nowrap">Deep Space</span>
+          <span className="hidden sm:inline font-mono text-[11px] whitespace-nowrap">Deep Space</span>
         </div>
 
         {/* Píldora deslizante con spring physics */}

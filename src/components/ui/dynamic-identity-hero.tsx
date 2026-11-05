@@ -143,7 +143,7 @@ export function DynamicIdentityHero() {
   const isEs = language === "es";
 
   return (
-    <section aria-label="AMH Identity Formation" className="relative w-full pt-4 pb-6 flex flex-col items-center justify-center text-center">
+    <section aria-label="AMH Identity Formation" className="relative w-full overflow-hidden pt-4 pb-6 flex flex-col items-center justify-center text-center">
       {/* Hidden audio element tied 1:1 to visual stage progression */}
       <audio
         ref={audioRef}
