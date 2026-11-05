@@ -88,9 +88,12 @@ ${languages
       c.title.includes("8,80") ||
       c.title.includes("8.80") ||
       c.title.includes("Google AI") ||
+      c.title.includes("Responsive Web") ||
+      c.title.includes("Perplexity") ||
+      c.title.includes("Toma de Decisiones") ||
       c.credentialCode === "HSMUZE4U1VDR" ||
       c.id.includes("cybersecurity")
-  ).slice(0, 4);
+  ).slice(0, 6);
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 py-6 px-4 print:p-0 print:bg-white print:text-black">

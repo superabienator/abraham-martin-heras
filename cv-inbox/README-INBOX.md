@@ -1,58 +1,49 @@
-# 📥 CV-Inbox — Sistema de Ingesta Incremental con IA y Checkpoints SHA-256
+# 📥 CV-Inbox — Sistema de Ingesta Inteligente y Curación Curricular
 
-Esta carpeta funciona como una **bandeja de entrada inteligente** para actualizar automáticamente [`src/data/cv-data.ts`](../src/data/cv-data.ts) a partir de nuevos diplomas, certificados oficiales o notas de experiencia laboral sin consumir tokens innecesarios.
-
----
-
-## 📄 Formatos Admitidos
-
-Deposita tus documentos directamente en `cv-inbox/`:
-
-| Extensión | Tipo MIME | Uso recomendado |
-| :--- | :--- | :--- |
-| `.pdf` | `application/pdf` | Diplomas oficiales, certificados de cursos, programas formativos o CV previo |
-| `.png`, `.jpg`, `.jpeg`, `.webp` | `image/*` | Capturas de credenciales, insignias verificadas o certificados escaneados |
-| `.txt`, `.md` | `text/plain` | Notas rápidas sobre nuevos proyectos, logros operativos, métricas o cursos |
+Esta carpeta funciona como la **bandeja de entrada inteligente** para mantener actualizado [`src/data/cv-data.ts`](../src/data/cv-data.ts) a partir de diplomas, certificaciones oficiales y credenciales técnicas, aplicando **reglas estrictas de relevancia para perfiles Full Stack, Ofimática Avanzada, Automatización e Inteligencia Artificial**.
 
 ---
 
-## ⚙️ Cómo Funciona (Ahorro de Tokens con Checkpoints)
+## 🎯 Reglas de Filtrado y Curación Curricular
 
-1. **Escaneo y Hash SHA-256:**  
-   Al ejecutar el script, se calcula la huella criptográfica (`SHA-256`) de cada archivo en `cv-inbox/` y se compara contra `cv-inbox/.checkpoint.json`.
-2. **Cero Coste si no hay Cambios:**  
-   Si todos los archivos ya fueron procesados anteriormente, el script termina de inmediato mostrando:  
-   `✅ Todo sincronizado. 0 archivos nuevos (0 tokens consumidos).`
-3. **Extracción Multimodal con `gemini-2.5-flash`:**  
-   Solo los archivos nuevos o modificados se envían como `inlineData` (base64) a la API REST de **Gemini 2.5 Flash**, junto con el estado actual de `src/data/cv-data.ts`.
-4. **Privacidad por Diseño (Filtro PII):**  
-   El System Prompt filtra y omite automáticamente datos sensibles personales presentes en los diplomas (DNI/NIE, dirección postal, teléfono personal o firmas).
-5. **Backup Automático:**  
-   Antes de sobrescribir `src/data/cv-data.ts`, se guarda una copia íntegra en `src/data/cv-data.backup.ts`.
+Para proyectar máxima solvencia ante reclutadores técnicos, directores de tecnología y responsables de operaciones, el pipeline aplica filtros deterministas:
 
----
+### 🚫 Reglas de Exclusión Estricta (Blacklist Automática)
+Se descartan automáticamente aquellos cursos que no aportan valor a una posición de software, IA u ofimática técnica:
+- **Maquinaria de planta / almacén físico:** Manejo de carretillas (FSEBON/FSEEXT), tractores, maquinaria pesada.
+- **Conducción de vehículos:** Conducción eficiente de vehículos eléctricos, semirremolques, transporte terrestre.
+- **Prevención de riesgos básicos y emergencias de nave:** Primeros auxilios básicos de almacén, planes de evacuación de incendios, PRL básico de operario.
+- **Seguridad en planta:** Calidad y medioambiente de planta, seguridad alimentaria/APPCC.
+- **Compliance corporativo genérico:** Conductas prohibidas, código de ética básico.
+- **Documentos de soporte:** Cartas de presentación, copias de vidas laborales o currículums antiguos (se reservan para contexto de experiencia, no como títulos).
 
-## 🚀 Requisitos y Ejecución
-
-1. Define tu clave en `.env.local` en la raíz del proyecto:
-   ```env
-   GEMINI_API_KEY="tu_clave_de_gemini_aqui"
-   ```
-2. Ejecuta la sincronización con cualquiera de estos métodos:
-   - **Vía npm ( multiplataforma):**
-     ```bash
-     npm run sync-cv
-     ```
-   - **Vía script Bash (con validación TypeScript integrada):**
-     ```bash
-     ./cv-inbox/actualizar-cv.sh
-     ```
+### ⭐ Reglas de Inclusión Prioritaria (Target Tech)
+Se homologan e integran con código de credencial y habilidades tipadas:
+1. **Full Stack & Desarrollo Web:** freeCodeCamp Responsive Web Design Developer Certification, React, TypeScript, HTML5, CSS3.
+2. **Inteligencia Artificial & LLMs:** Google AI Professional Certificate, AI for Data Analysis, AI for Content Creation, AI for Writing and Communicating, Perplexity AI, Agentes de IA (Negocios y Procesos), Prompt Engineering, ChatGPT, Gemini.
+3. **Python, Datos & Automatización:** Curso Profesional de Programación en Python (260h), ETL con Pandas, n8n, Playwright, SGA/ERP Codisys Logística.
+4. **Ciberseguridad & Privacidad de Datos:** Google Cybersecurity Certificate (260h), Protección de Datos & RGPD.
+5. **Estrategia, Liderazgo & Educación Superior:** Toma de Decisiones y Resolución de Problemas (Grupo Hedima, 10h), Liderazgo y Motivación de Equipos, PAU +25 (Universitat de València, nota 8,80 sobresaliente).
 
 ---
 
-## 🔒 Privacidad en Git (`.gitignore`)
+## 🚀 Ejecución y Comandos
 
-El archivo `.gitignore` del proyecto está configurado para **ignorar todos tus documentos personales** (`.pdf`, imágenes, notas privadas, `.checkpoint.json` y `src/data/cv-data.backup.ts`), subiendo al repositorio únicamente:
-- `cv-inbox/sync-cv.mjs`
-- `cv-inbox/actualizar-cv.sh`
-- `cv-inbox/README-INBOX.md`
+- **Sincronización incremental:**
+  ```bash
+  npm run sync-cv
+  ```
+- **Sincronización completa desde cero (reset):**
+  ```bash
+  node cv-inbox/sync-cv.mjs --reset
+  ```
+- **Vía script Bash con verificación TypeScript:**
+  ```bash
+  ./cv-inbox/actualizar-cv.sh
+  ```
+
+---
+
+## 🔒 Privacidad y Git (`.gitignore`)
+
+Tus documentos personales (`.pdf`, imágenes, `.checkpoint.json` y `cv-data.backup.ts`) permanecen ignorados en Git por confidencialidad, versionándose únicamente el código del motor y las plantillas públicas.

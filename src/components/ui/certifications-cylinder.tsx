@@ -167,7 +167,10 @@ export function CertificationsCylinder({ certifications }: CertificationsCylinde
   const getSpecialBadge = (cert: CertificationItem) => {
     if (cert.title.includes("260h")) return "⏱ 260 horas lectivas";
     if (cert.title.includes("8,80")) return "⭐ Nota PAU: 8,80";
-    if (cert.credentialCode?.startsWith("HSM")) return "Google Verified";
+    if (cert.title.includes("Responsive Web") || cert.id.includes("freecodecamp")) return "💻 Web Dev Certified";
+    if (cert.id.includes("perplexity")) return "🔍 AI Search & Inferencia";
+    if (cert.id.includes("toma-decisiones")) return "🎯 Dirección Estratégica";
+    if (cert.credentialCode?.startsWith("HSM") || cert.issuer.includes("Google")) return "Google Verified";
     if (cert.category) return cert.category;
     return null;
   };
