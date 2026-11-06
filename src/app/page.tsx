@@ -14,6 +14,7 @@ import { LanguageToggle } from "@/components/ui/language-toggle";
 import { HeaderReveal, EditorialReveal } from "@/components/ui/editorial-reveal";
 import { CertificationsCylinder } from "@/components/ui/certifications-cylinder";
 import { DynamicIdentityHero } from "@/components/ui/dynamic-identity-hero";
+import { SandQuoteBanner } from "@/components/ui/sand-quote-banner";
 import {
   Bot,
   Workflow,
@@ -613,8 +614,13 @@ export default function HomePage() {
         </RevealSection>
       </main>
 
+      {/* Banner de Cierre: Tipografía Generativa de Arena Magnética */}
+      <div className="mt-16 md:mt-24">
+        <SandQuoteBanner />
+      </div>
+
       {/* Footer Ejecutivo y Saneado (Cero fugas técnicas) */}
-      <footer className="border-t border-slate-200/80 dark:border-white/10 bg-white/75 dark:bg-slate-950/75 backdrop-blur-md transform-gpu py-10 mt-20 transition-colors duration-300">
+      <footer className="border-t border-slate-200/80 dark:border-white/10 bg-white/75 dark:bg-slate-950/75 backdrop-blur-md transform-gpu py-10 transition-colors duration-300">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3.5">
             <div className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/90 dark:border-white/10 bg-white/90 dark:bg-slate-900/90 shadow-xs shrink-0 overflow-hidden">
