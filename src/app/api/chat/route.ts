@@ -276,6 +276,28 @@ function checkRateLimit(ip: string): { allowed: boolean; remaining: number; retr
 }
 
 export async function POST(req: Request) {
+  // Validación estricta de Origen / Referer para prevenir CSRF y abuso de API
+  const origin = req.headers.get("origin");
+  const host = req.headers.get("host") || "";
+  if (origin) {
+    try {
+      const originHost = new URL(origin).host;
+      const isLocalhost = originHost.includes("localhost") || originHost.includes("127.0.0.1");
+      const isAllowedHost =
+        originHost === host ||
+        originHost === "abraham-martin-heras.dev" ||
+        originHost.endsWith(".vercel.app");
+      if (!isLocalhost && !isAllowedHost) {
+        return NextResponse.json(
+          { error: "Origen no autorizado (Forbidden origin)" },
+          { status: 403 }
+        );
+      }
+    } catch {
+      return NextResponse.json({ error: "Cabecera de origen inválida" }, { status: 400 });
+    }
+  }
+
   const clientIp = getClientIp(req);
   const rateLimit = checkRateLimit(clientIp);
 
@@ -411,16 +433,17 @@ ${JSON.stringify(cvData, null, 2)}`;
       });
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(
-      apiKey
-    )}`;
+    const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 9000); // 9 segundos de timeout
 
     const geminiRes = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
       signal: controller.signal,
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemInstruction }] },

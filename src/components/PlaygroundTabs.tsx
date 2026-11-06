@@ -72,7 +72,7 @@ export function PlaygroundTabs({ tabs }: PlaygroundTabsProps) {
           {tabs.map((tab) => {
             const isActive = tab.id === activeTab.id;
             return (
-              <div key={tab.id} className="relative">
+              <div key={tab.id} role="presentation" className="relative">
                 {isActive && (
                   <motion.div
                     layoutId="activeTab"
@@ -88,6 +88,8 @@ export function PlaygroundTabs({ tabs }: PlaygroundTabsProps) {
                   strength={0.14}
                   role="tab"
                   ariaSelected={isActive}
+                  id={`tab-${tab.id}`}
+                  ariaControls={`tabpanel-${tab.id}`}
                   onClick={() => setActiveTabId(tab.id)}
                   className={`group relative z-10 flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left transition-colors duration-200 cursor-pointer ${
                     isActive
@@ -118,7 +120,13 @@ export function PlaygroundTabs({ tabs }: PlaygroundTabsProps) {
       </div>
 
       {/* Active Tab Content Area with Animated Transition */}
-      <div className="p-6 sm:p-8 lg:p-10 bg-white/60 dark:bg-slate-950/50 min-h-[500px]">
+      <div
+        role="tabpanel"
+        id={`tabpanel-${activeTab.id}`}
+        aria-labelledby={`tab-${activeTab.id}`}
+        tabIndex={0}
+        className="p-6 sm:p-8 lg:p-10 bg-white/60 dark:bg-slate-950/50 min-h-[500px] focus:outline-none focus-visible:ring-1 focus-visible:ring-violet-400"
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab.id}

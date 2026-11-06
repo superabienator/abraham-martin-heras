@@ -364,27 +364,65 @@ export function CvChat() {
       </div>
 
       {/* 4. Barra de Escritura */}
-      <form onSubmit={handleSubmit} className="relative flex items-center">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          disabled={isLoading}
-          placeholder={
-            language === "es"
-              ? "Escribe una pregunta sobre la experiencia, certificaciones o disponibilidad de Abraham..."
-              : "Ask anything about Abraham's background, certifications, tech stack or availability..."
-          }
-          className="w-full rounded-xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-slate-900 py-3 pl-4 pr-12 text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40 dark:focus:ring-cyan-500/40 shadow-xs"
-        />
-        <button
-          type="submit"
-          disabled={!inputValue.trim() || isLoading}
-          aria-label="Enviar mensaje"
-          className="absolute right-2 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-cyan-500 dark:to-teal-500 text-white dark:text-slate-950 disabled:opacity-40 hover:brightness-110 transition-all cursor-pointer shadow-xs"
-        >
-          <Send className="h-3.5 w-3.5" />
-        </button>
+      <form onSubmit={handleSubmit} className="space-y-2">
+        <label htmlFor="cv-chat-query" className="sr-only">
+          {language === "es"
+            ? "Escribe tu pregunta sobre la experiencia o disponibilidad de Abraham"
+            : "Type your question about Abraham's background or availability"}
+        </label>
+        <div className="relative flex items-center">
+          <input
+            id="cv-chat-query"
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            disabled={isLoading}
+            aria-label={
+              language === "es"
+                ? "Escribe tu pregunta sobre la experiencia o disponibilidad de Abraham"
+                : "Type your question about Abraham's background or availability"
+            }
+            placeholder={
+              language === "es"
+                ? "Escribe una pregunta sobre la experiencia, certificaciones o disponibilidad de Abraham..."
+                : "Ask anything about Abraham's background, certifications, tech stack or availability..."
+            }
+            className="w-full rounded-xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-slate-900 py-3 pl-4 pr-12 text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40 dark:focus:ring-cyan-500/40 shadow-xs"
+          />
+          <button
+            type="submit"
+            disabled={!inputValue.trim() || isLoading}
+            aria-label={language === "es" ? "Enviar mensaje" : "Send message"}
+            className="absolute right-2 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-cyan-500 dark:to-teal-500 text-white dark:text-slate-950 disabled:opacity-40 hover:brightness-110 transition-all cursor-pointer shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+          >
+            <Send className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <p className="text-[10px] text-slate-500 dark:text-slate-400 text-center leading-normal">
+          {language === "es" ? (
+            <>
+              Inferencia asistida por la API de Google Gemini sobre datos profesionales públicos. No introduzcas datos confidenciales. Consulta la{" "}
+              <a
+                href="/privacidad"
+                className="underline hover:text-violet-600 dark:hover:text-cyan-400 transition-colors"
+              >
+                Política de Privacidad (RGPD)
+              </a>
+              .
+            </>
+          ) : (
+            <>
+              Assisted by Google Gemini API grounded on verified public resume data. Do not enter confidential data. See{" "}
+              <a
+                href="/privacidad"
+                className="underline hover:text-violet-600 dark:hover:text-cyan-400 transition-colors"
+              >
+                Privacy Policy (GDPR)
+              </a>
+              .
+            </>
+          )}
+        </p>
       </form>
     </div>
   );

@@ -11,7 +11,7 @@ type AnimationStage = "words" | "collapsing" | "converging" | "nebula" | "settle
 export function DynamicIdentityHero() {
   const { language } = useLanguage();
   const [stage, setStage] = useState<AnimationStage>("words");
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRafRef = useRef<number | null>(null);
@@ -96,13 +96,14 @@ export function DynamicIdentityHero() {
     }
   }, [isMuted, runFallbackLoop]);
 
-  // Start sequence on initial mount
+  // Start visual sequence on initial mount silently (WCAG 1.4.2 Audio Control compliant)
   useEffect(() => {
-    startAudio();
+    fallbackStartRef.current = performance.now();
+    runFallbackLoop();
     return () => {
       if (timerRafRef.current) cancelAnimationFrame(timerRafRef.current);
     };
-  }, [startAudio]);
+  }, [runFallbackLoop]);
 
   // Synchronize visual stage directly from the audio element's own timeupdate event!
   // This guarantees 0ms drift / mathematically locked to the sound
@@ -303,7 +304,8 @@ export function DynamicIdentityHero() {
                 type="button"
                 onClick={handleReplay}
                 title={isEs ? "Haz clic en el logotipo para repetir la animación" : "Click logo to replay animation"}
-                className="relative flex h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 items-center justify-center rounded-3xl border border-slate-200/90 dark:border-cyan-500/30 bg-white/95 dark:bg-slate-900/95 shadow-xl shadow-violet-500/10 dark:shadow-[0_15px_40px_rgba(6,182,212,0.15)] backdrop-blur-md overflow-hidden transform-gpu transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer focus:outline-hidden"
+                aria-label={isEs ? "Repetir animación del logotipo AMH" : "Replay AMH logo animation"}
+                className="relative flex h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 items-center justify-center rounded-3xl border border-slate-200/90 dark:border-cyan-500/30 bg-white/95 dark:bg-slate-900/95 shadow-xl shadow-violet-500/10 dark:shadow-[0_15px_40px_rgba(6,182,212,0.15)] backdrop-blur-md overflow-hidden transform-gpu transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:focus-visible:ring-cyan-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
               >
                 <Image
                   src="/amh-logo-card.png"
@@ -323,9 +325,9 @@ export function DynamicIdentityHero() {
           <button
             type="button"
             onClick={toggleSound}
-            title={isMuted ? (isEs ? "Activar sonido" : "Unmute") : (isEs ? "Silenciar" : "Mute")}
-            aria-label={isMuted ? "Unmute sound" : "Mute sound"}
-            className={`flex h-8 w-8 items-center justify-center rounded-full border transition-all cursor-pointer shadow-2xs hover:scale-110 active:scale-90 ${
+            title={isMuted ? (isEs ? "Activar sonido experiencial" : "Enable experiential audio") : (isEs ? "Silenciar" : "Mute")}
+            aria-label={isMuted ? (isEs ? "Activar sonido experiencial" : "Enable experiential audio") : (isEs ? "Silenciar audio" : "Mute audio")}
+            className={`flex h-8 w-8 items-center justify-center rounded-full border transition-all cursor-pointer shadow-2xs hover:scale-110 active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:focus-visible:ring-cyan-400 ${
               isMuted
                 ? "border-slate-200/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/70 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                 : "border-cyan-400/60 dark:border-cyan-500/50 bg-cyan-50/70 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 shadow-sm shadow-cyan-500/10"

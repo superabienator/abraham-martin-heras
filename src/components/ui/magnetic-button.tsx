@@ -14,6 +14,8 @@ interface MagneticButtonProps {
   rel?: string;
   role?: string;
   ariaSelected?: boolean;
+  id?: string;
+  ariaControls?: string;
   title?: string;
 }
 
@@ -28,6 +30,8 @@ export function MagneticButton({
   rel,
   role,
   ariaSelected,
+  id,
+  ariaControls,
   title,
 }: MagneticButtonProps) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -89,9 +93,11 @@ export function MagneticButton({
       className="inline-block w-full"
     >
       <button
+        id={id}
         type="button"
         role={role}
         aria-selected={ariaSelected}
+        aria-controls={ariaControls}
         onClick={onClick}
         title={title}
         className={className}

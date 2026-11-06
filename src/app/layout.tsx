@@ -78,7 +78,66 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
+  alternates: {
+    canonical: "https://abraham-martin-heras.dev",
+    languages: {
+      "es-ES": "https://abraham-martin-heras.dev",
+      "en-US": "https://abraham-martin-heras.dev?lang=en",
+      "x-default": "https://abraham-martin-heras.dev",
+    },
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://abraham-martin-heras.dev/#person",
+      name: cvData.profile.name,
+      jobTitle: cvData.profile.role,
+      description: cvData.profile.tagline,
+      url: "https://abraham-martin-heras.dev",
+      sameAs: [
+        "https://github.com/superabienator",
+        "https://linkedin.com/in/abraham-martin-heras",
+      ],
+      knowsAbout: [
+        "Full Stack Development",
+        "Artificial Intelligence",
+        "Process Automation",
+        "Next.js",
+        "React",
+        "TypeScript",
+        "Python",
+        "n8n",
+        "Playwright",
+        "Cybersecurity",
+        "PostGIS",
+      ],
+      alumniOf: {
+        "@type": "EducationalOrganization",
+        name: "Universitat de València",
+      },
+    },
+    {
+      "@type": "ProfilePage",
+      "@id": "https://abraham-martin-heras.dev/#webpage",
+      url: "https://abraham-martin-heras.dev",
+      name: `${cvData.profile.name} | Full Stack AI · Automatización de Procesos`,
+      description: cvData.profile.tagline,
+      inLanguage: ["es", "en"],
+      mainEntity: { "@id": "https://abraham-martin-heras.dev/#person" },
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -93,7 +152,20 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="min-h-full transition-colors duration-300 selection:bg-violet-500/20 selection:text-violet-950 dark:selection:bg-cyan-500/20 dark:selection:text-cyan-200">
+        {/* Enlace accesible para saltar directamente al contenido principal (WCAG 2.4.1) */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2.5 focus:rounded-xl focus:bg-violet-600 focus:text-white focus:font-semibold focus:text-xs focus:shadow-xl focus:ring-2 focus:ring-offset-2 focus:ring-white transition-all"
+        >
+          Saltar al contenido principal / Skip to main content
+        </a>
         <ThemeProvider>
           <LanguageProvider>
             <ScrollProgress />

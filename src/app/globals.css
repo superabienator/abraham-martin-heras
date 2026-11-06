@@ -178,3 +178,33 @@ body {
 #timeline {
   contain: layout style;
 }
+
+/* ============================================================================
+   WCAG 2.1 A11Y: Respeto Estricto a prefers-reduced-motion
+   ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .text-holographic {
+    animation: none !important;
+    background-position: 50% 50% !important;
+  }
+
+  .animate-halo-cyan,
+  .animate-halo-lavender,
+  .animate-halo-mint {
+    animation: none !important;
+    transform: none !important;
+  }
+}

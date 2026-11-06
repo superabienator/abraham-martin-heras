@@ -474,7 +474,12 @@ export function DataCleaner() {
             </span>
             <span>{rawText.split("\n").filter((l) => l.trim()).length} filas detectadas</span>
           </div>
+          <label htmlFor="raw-data-textarea" className="sr-only">
+            Entrada de datos ofimáticos en bruto
+          </label>
           <textarea
+            id="raw-data-textarea"
+            aria-label="Entrada de datos ofimáticos en bruto (CSV o registros sin estructurar)"
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
             rows={7}
@@ -555,11 +560,16 @@ export function DataCleaner() {
             {/* Controles de la Tabla (Búsqueda, Vistas y Exportación) */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/70 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200/80 dark:border-white/10">
               <div className="relative flex-1 max-w-sm">
+                <label htmlFor="filter-table-input" className="sr-only">
+                  Filtrar registros
+                </label>
                 <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
                 <input
+                  id="filter-table-input"
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  aria-label="Filtrar registros por código, entidad o estado"
                   placeholder="Filtrar por código, entidad, estado..."
                   className="w-full rounded-lg border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-950 py-1.5 pl-8 pr-3 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />

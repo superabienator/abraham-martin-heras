@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useLanguage } from "@/context/language-context";
 import { type BentoCategory, type SocialLink, type TimelineEntry } from "@/data/cv-data";
 import { PlaygroundTabs } from "@/components/PlaygroundTabs";
@@ -176,7 +177,7 @@ export default function HomePage() {
         </div>
       </HeaderReveal>
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-16 py-6 sm:py-10">
+      <main id="main-content" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-16 py-6 sm:py-10">
         {/* =====================================================================
             0. DYNAMIC AMH IDENTITY FORMATION (Kinetic Typography & Audio Fusion)
         ===================================================================== */}
@@ -199,7 +200,7 @@ export default function HomePage() {
                   <span className="font-semibold text-slate-900 dark:text-white">
                     {profile.availabilityBadge.statusText}
                   </span>
-                  <span className="hidden sm:inline text-slate-400 dark:text-slate-600">•</span>
+                  <span className="hidden sm:inline text-slate-500 dark:text-slate-400">•</span>
                   <span className="hidden sm:inline text-slate-600 dark:text-slate-400 font-mono text-[11px]">
                     {profile.availabilityBadge.subText}
                   </span>
@@ -212,9 +213,12 @@ export default function HomePage() {
                   {profile.role}
                 </p>
                 <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.08]">
-                  {t.hero.titlePrefix}{" "}
-                  <span className="text-holographic">
-                    {t.hero.titleHighlight}
+                  <span className="block font-brand">{profile.name}</span>
+                  <span className="text-2xl sm:text-4xl lg:text-5xl font-semibold text-slate-700 dark:text-slate-200 block mt-2">
+                    {t.hero.titlePrefix}{" "}
+                    <span className="text-holographic">
+                      {t.hero.titleHighlight}
+                    </span>
                   </span>
                 </h1>
                 <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl">
@@ -629,13 +633,14 @@ export default function HomePage() {
                 alt="AMH"
                 width={40}
                 height={40}
+                sizes="40px"
                 className="h-full w-full object-cover"
               />
             </div>
             <div className="space-y-1 text-center md:text-left">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                 <span className="font-bold text-slate-900 dark:text-white">{profile.name}</span>
-                <span className="text-slate-400">•</span>
+                <span className="text-slate-500 dark:text-slate-400">•</span>
                 <span className="text-xs text-slate-600 dark:text-slate-400">{profile.role}</span>
               </div>
               <div className="flex items-center justify-center md:justify-start gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
@@ -646,7 +651,7 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="flex items-center gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
               <a
                 href={githubSocial.url}
                 target="_blank"
@@ -655,7 +660,7 @@ export default function HomePage() {
               >
                 {githubSocial.label}
               </a>
-              <span className="text-slate-300 dark:text-slate-700">•</span>
+              <span className="text-slate-400 dark:text-slate-600">•</span>
               <a
                 href={linkedinSocial.url}
                 target="_blank"
@@ -664,9 +669,16 @@ export default function HomePage() {
               >
                 {linkedinSocial.label}
               </a>
+              <span className="text-slate-400 dark:text-slate-600">•</span>
+              <Link
+                href="/privacidad"
+                className="hover:text-violet-600 dark:hover:text-cyan-400 transition-colors"
+              >
+                Privacidad (RGPD)
+              </Link>
             </div>
 
-            <div className="font-mono text-[11px] text-slate-500 dark:text-slate-400 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-white/10 pt-2 sm:pt-0 sm:pl-6 text-center sm:text-left">
+            <div className="font-mono text-[11px] text-slate-600 dark:text-slate-400 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-white/10 pt-2 sm:pt-0 sm:pl-6 text-center sm:text-left">
               {t.footer.subtitle}
             </div>
           </div>
