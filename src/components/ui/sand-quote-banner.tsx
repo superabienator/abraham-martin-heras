@@ -5,23 +5,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/context/theme-context";
 import { useLanguage } from "@/context/language-context";
 
-// Paletas cromáticas del Tema Dual
-// Modo Holographic Pearl (Claro): mayor densidad cromática con pizarra profundo, esmeralda oscuro, índigo y destellos violetas
+// Paletas cromáticas de alto contraste y fidelidad para el Tema Dual
+// Modo Holographic Pearl (Fondo claro): colores profundos y nítidos con pizarra, esmeralda oscuro, índigo y destello violeta
 const PEARL_PALETTE = [
-  "#0F172A", // Pizarra profundo (Slate 900)
-  "#0D9488", // Esmeralda oscuro (Teal 600)
-  "#4F46E5", // Índigo profundo (Indigo 600)
-  "#7C3AED", // Destello violeta (Violet 600)
-  "#1E293B", // Pizarra grafito (Slate 800)
+  "#0F172A", // Pizarra profundo
+  "#0D9488", // Esmeralda oscuro
+  "#4338CA", // Índigo intenso
+  "#6D28D9", // Violeta profundo
+  "#1E293B", // Grafito pizarra
 ];
 
-// Modo Deep Space (Oscuro): luminiscente combinando blanco perla, cian ártico, verde agua y lavanda brillante
+// Modo Deep Space (Fondo oscuro): luminiscentes blanco puro, cian ártico, verde agua y lavanda brillante
 const DEEP_SPACE_PALETTE = [
-  "#F8FAFC", // Blanco perla luminoso (Slate 50)
-  "#38BDF8", // Cian ártico (Sky 400)
-  "#34D399", // Verde agua luminiscente (Emerald 400)
-  "#C084FC", // Lavanda brillante (Purple 400)
-  "#E0F2FE", // Hielo perla (Sky 100)
+  "#FFFFFF", // Blanco puro
+  "#38BDF8", // Cian ártico brillante
+  "#34D399", // Verde agua luminiscente
+  "#C084FC", // Lavanda neón
+  "#E0F2FE", // Cian hielo
 ];
 
 interface SandGrain {
@@ -52,7 +52,7 @@ export function SandQuoteBanner() {
   const [isConverging, setIsConverging] = useState(false);
   const [showAuthor, setShowAuthor] = useState(false);
 
-  // Referencias mutables para animación continua a 60 FPS sin re-renders
+  // Referencias mutables para animación continua a 60 FPS sin desincronización
   const themeRef = useRef(theme);
   const isConvergingRef = useRef(false);
   const particlesRef = useRef<SandGrain[]>([]);
@@ -68,79 +68,79 @@ export function SandQuoteBanner() {
     isConvergingRef.current = isConverging;
   }, [isConverging]);
 
-  // Selección de frase bilingüe según contexto
+  // Selección de frase bilingüe
   const isEn = language === "en";
   const quoteLine1 = isEn ? "Curiosity and creativity" : "La curiosidad y la creatividad";
-  const quoteLine2 = isEn ? "are intelligence having fun." : "son inteligencia divirtiéndose.";
-  const fullQuote = isEn
-    ? "Curiosity and creativity are intelligence having fun."
-    : "La curiosidad y la creatividad son inteligencia divirtiéndose.";
+  const quoteLine2 = isEn ? "are intelligence having fun." : "son la inteligencia divirtiéndose.";
+  const fullQuote = `${quoteLine1} ${quoteLine2}`;
   const authorName = "Albert Einstein";
 
-  // Muestreo de coordenadas en memoria (Offscreen Canvas Sampling)
+  // Muestreo preciso de coordenadas en memoria (Offscreen Canvas Sampling)
   const generateTargetCoordinates = useCallback(
     (cssWidth: number, cssHeight: number) => {
       if (typeof window === "undefined" || cssWidth <= 0 || cssHeight <= 0) return [];
 
+      const w = Math.round(cssWidth);
+      const h = Math.round(cssHeight);
+
       const offscreen = document.createElement("canvas");
-      offscreen.width = cssWidth;
-      offscreen.height = cssHeight;
+      offscreen.width = w;
+      offscreen.height = h;
       const offCtx = offscreen.getContext("2d", { willReadFrequently: true });
       if (!offCtx) return [];
 
-      // Detección responsive de escala de fuente y disposición (1 línea vs 2 líneas)
-      const isMobile = cssWidth < 640;
-      const isTablet = cssWidth >= 640 && cssWidth < 1024;
-      
-      let fontSize: number;
-      let lines: string[];
+      // Tamaño de tipografía proporcional para que las letras tengan gran presencia y nunca se desborden
+      // En móvil: 16px - 20px en 2 líneas
+      // En desktop: 24px - 34px en 2 líneas
+      const isMobile = w < 640;
+      let fontSize = isMobile
+        ? Math.max(15, Math.min(20, Math.floor(w / 20)))
+        : Math.max(22, Math.min(32, Math.floor(w / 38)));
 
-      if (isMobile) {
-        // En móviles siempre en 2 líneas
-        fontSize = Math.max(15, Math.min(20, Math.floor(cssWidth / 19)));
-        lines = [quoteLine1, quoteLine2];
-      } else if (isTablet) {
-        // En tablet evaluamos si cabe en 1 o 2 líneas
-        fontSize = Math.max(18, Math.min(24, Math.floor(cssWidth / 36)));
-        lines = cssWidth < 880 ? [quoteLine1, quoteLine2] : [fullQuote];
-      } else {
-        // Desktop: tipografía amplia y proporcionada
-        fontSize = Math.max(22, Math.min(32, Math.floor(cssWidth / 42)));
-        lines = cssWidth < 1180 ? [quoteLine1, quoteLine2] : [fullQuote];
+      // Verificación de ajuste de ancho: si la línea más larga excede el 90% del ancho, escalamos hacia abajo
+      offCtx.font = `800 ${fontSize}px "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      const m1 = offCtx.measureText(quoteLine1).width;
+      const m2 = offCtx.measureText(quoteLine2).width;
+      const maxTextWidth = Math.max(m1, m2);
+      const availableWidth = w * 0.88;
+
+      if (maxTextWidth > availableWidth && maxTextWidth > 0) {
+        fontSize = Math.floor(fontSize * (availableWidth / maxTextWidth));
       }
 
-      offCtx.font = `700 ${fontSize}px var(--font-montserrat), Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      // Dibujar texto blanco sobre fondo transparente en el offscreen canvas con tipografía ultra-bold 800
+      offCtx.font = `800 ${fontSize}px "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       offCtx.textAlign = "center";
       offCtx.textBaseline = "middle";
       offCtx.fillStyle = "#ffffff";
 
-      // Centrado vertical ligeramente desplazado hacia arriba para dar espacio natural a la firma
-      const lineHeight = fontSize * 1.35;
-      const totalBlockHeight = lines.length * lineHeight;
-      const baseY = (cssHeight - 48) / 2 - totalBlockHeight / 2 + lineHeight / 2;
+      // Centrado vertical: bloque tipográfico centrado en el tercio superior/medio para dar aire a la firma
+      const lineHeight = Math.round(fontSize * 1.38);
+      const centerY = Math.round(h * 0.40);
+      const lineY1 = centerY - Math.round(lineHeight / 2);
+      const lineY2 = centerY + Math.round(lineHeight / 2);
 
-      lines.forEach((line, index) => {
-        const lineY = baseY + index * lineHeight;
-        offCtx.fillText(line, cssWidth / 2, lineY);
-      });
+      offCtx.fillText(quoteLine1, Math.round(w / 2), lineY1);
+      offCtx.fillText(quoteLine2, Math.round(w / 2), lineY2);
 
-      // Muestreo de píxeles con paso adaptativo para garantizar nitidez óptima y ligereza (1.200 a 2.300 partículas)
-      const step = isMobile ? 2.2 : isTablet ? 2.5 : 2.8;
-      const imgData = offCtx.getImageData(0, 0, cssWidth, cssHeight);
+      // Muestreo con paso denso (2.0 a 2.4 px) para formar caracteres continuos y legibles
+      const step = isMobile ? 2.0 : 2.2;
+      const imgData = offCtx.getImageData(0, 0, w, h);
       const data = imgData.data;
       const targets: { x: number; y: number }[] = [];
 
-      for (let y = 0; y < cssHeight; y += step) {
-        for (let x = 0; x < cssWidth; x += step) {
-          const pixelX = Math.floor(x);
-          const pixelY = Math.floor(y);
-          const index = (pixelY * cssWidth + pixelX) * 4;
+      for (let y = 0; y < h; y += step) {
+        for (let x = 0; x < w; x += step) {
+          const px = Math.floor(x);
+          const py = Math.floor(y);
+          const index = (py * w + px) * 4;
           const alpha = data[index + 3];
 
-          if (alpha > 128) {
+          // Canal alfa superior al umbral
+          if (alpha > 110) {
             targets.push({
-              x: pixelX + (Math.random() - 0.5) * 0.4,
-              y: pixelY + (Math.random() - 0.5) * 0.4,
+              x: px + (Math.random() - 0.5) * 0.3,
+              y: py + (Math.random() - 0.5) * 0.3,
             });
           }
         }
@@ -148,10 +148,10 @@ export function SandQuoteBanner() {
 
       return targets;
     },
-    [quoteLine1, quoteLine2, fullQuote]
+    [quoteLine1, quoteLine2]
   );
 
-  // Inicialización y reconstrucción de partículas
+  // Inicialización y actualización de partículas
   const initParticles = useCallback(
     (w: number, h: number) => {
       const targets = generateTargetCoordinates(w, h);
@@ -164,7 +164,7 @@ export function SandQuoteBanner() {
         const target = targets[i];
         const existing = currentParticles[i];
 
-        // Posición inicial dispersa orgánica por todo el banner
+        // Posición dispersa distribuida por el lienzo del banner
         const originX = existing ? existing.originX : Math.random() * w;
         const originY = existing ? existing.originY : Math.random() * h;
 
@@ -175,17 +175,17 @@ export function SandQuoteBanner() {
           targetY: target.y,
           originX,
           originY,
-          vx: existing ? existing.vx : (Math.random() - 0.5) * 0.6,
-          vy: existing ? existing.vy : (Math.random() - 0.5) * 0.6,
-          size: Math.random() * 0.7 + 0.9, // 0.9px a 1.6px para grano fino de cuarzo
-          // Variación individual de resorte para convergencia orgánica y fluida
-          spring: 0.045 + Math.random() * 0.04,
-          friction: 0.84 + Math.random() * 0.04,
+          vx: existing ? existing.vx : (Math.random() - 0.5) * 0.8,
+          vy: existing ? existing.vy : (Math.random() - 0.5) * 0.8,
+          // Tamaño de grano entre 1.0px y 1.7px para que solapen suavemente formando letras continuas
+          size: Math.random() * 0.6 + 1.1,
+          spring: 0.052 + Math.random() * 0.035,
+          friction: 0.83 + Math.random() * 0.04,
           wanderAngle: Math.random() * Math.PI * 2,
-          wanderSpeed: (Math.random() - 0.5) * 0.02 + 0.008,
-          wanderRadius: Math.random() * 28 + 12,
+          wanderSpeed: (Math.random() - 0.5) * 0.02 + 0.01,
+          wanderRadius: Math.random() * 25 + 10,
           colorIndex: i % 5,
-          alpha: Math.random() * 0.35 + 0.65,
+          alpha: Math.random() * 0.15 + 0.85,
         });
       }
 
@@ -194,34 +194,42 @@ export function SandQuoteBanner() {
     [generateTargetCoordinates]
   );
 
-  // IntersectionObserver para Scroll Trigger al 25%
+  // Detección de visibilidad con IntersectionObserver + chequeo inmediato
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
     let timeoutId: NodeJS.Timeout | null = null;
 
+    const checkVisibility = (isVis: boolean) => {
+      if (isVis) {
+        setIsConverging(true);
+        if (!showAuthor) {
+          timeoutId = setTimeout(() => {
+            setShowAuthor(true);
+          }, 1100);
+        }
+      } else {
+        setIsConverging(false);
+        setShowAuthor(false);
+        if (timeoutId) clearTimeout(timeoutId);
+      }
+    };
+
+    // Comprobación inicial directa por si el usuario ya está al fondo de la página
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      checkVisibility(true);
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsConverging(true);
-            // Hacer aparecer suavemente la firma editorial a los ~1.2s de la convergencia
-            if (!showAuthor) {
-              timeoutId = setTimeout(() => {
-                setShowAuthor(true);
-              }, 1200);
-            }
-          } else {
-            // Si el usuario vuelve a subir lejos, se relajan los granos
-            setIsConverging(false);
-            setShowAuthor(false);
-            if (timeoutId) clearTimeout(timeoutId);
-          }
+          checkVisibility(entry.isIntersecting);
         });
       },
       {
-        threshold: 0.25,
+        threshold: [0.08, 0.25],
       }
     );
 
@@ -233,7 +241,7 @@ export function SandQuoteBanner() {
     };
   }, [showAuthor]);
 
-  // Manejador de redimensionado con debounce
+  // Manejador de redimensionado con sincronización de fuentes y debounce
   useEffect(() => {
     let resizeTimer: NodeJS.Timeout | null = null;
 
@@ -246,23 +254,23 @@ export function SandQuoteBanner() {
 
         const rect = container.getBoundingClientRect();
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const w = rect.width;
-        const h = rect.height;
+        const w = Math.round(rect.width);
+        const h = Math.round(rect.height);
 
         dimensionsRef.current = { width: w, height: h, dpr };
-        canvas.width = Math.floor(w * dpr);
-        canvas.height = Math.floor(h * dpr);
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
         canvas.style.width = `${w}px`;
         canvas.style.height = `${h}px`;
 
         initParticles(w, h);
-      }, 150);
+      }, 120);
     };
 
     handleResize();
     window.addEventListener("resize", handleResize);
 
-    // Si las fuentes web tardan unos milisegundos en cargar, re-muestrear para métricas perfectas
+    // Asegurar métricas tipográficas una vez que las fuentes web estén completamente listas
     if (typeof document !== "undefined" && "fonts" in document) {
       document.fonts.ready.then(() => {
         handleResize();
@@ -275,7 +283,7 @@ export function SandQuoteBanner() {
     };
   }, [initParticles]);
 
-  // Re-muestreo al cambiar de idioma
+  // Re-muestrear si el usuario cambia el idioma (es / en)
   useEffect(() => {
     const { width: w, height: h } = dimensionsRef.current;
     if (w > 0 && h > 0) {
@@ -283,7 +291,7 @@ export function SandQuoteBanner() {
     }
   }, [language, initParticles]);
 
-  // Bucle de Física y Renderizado Canvas 2D
+  // Bucle de física e iluminación Canvas 2D
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -316,7 +324,7 @@ export function SandQuoteBanner() {
           const p = particles[i];
 
           if (converging) {
-            // Física de atracción elástica magnética hacia la posición esculpida
+            // Fuerza magnética de resorte hacia la coordenada esculpida
             const dx = p.targetX - p.x;
             const dy = p.targetY - p.y;
             p.vx += dx * p.spring;
@@ -324,7 +332,7 @@ export function SandQuoteBanner() {
             p.vx *= p.friction;
             p.vy *= p.friction;
 
-            // Repulsión por proximidad al cursor
+            // Repulsión interactiva si el cursor se acerca a las letras
             if (mouse.active) {
               const mx = p.x - mouse.x;
               const my = p.y - mouse.y;
@@ -332,7 +340,7 @@ export function SandQuoteBanner() {
 
               if (distSq < repulsionRadiusSq && distSq > 0) {
                 const dist = Math.sqrt(distSq);
-                const force = (1 - dist / repulsionRadius) * 4.8;
+                const force = (1 - dist / repulsionRadius) * 5.2;
                 p.vx += (mx / dist) * force;
                 p.vy += (my / dist) * force;
               }
@@ -341,7 +349,7 @@ export function SandQuoteBanner() {
             p.x += p.vx;
             p.y += p.vy;
           } else {
-            // Flotación relajada orgánica mientras no converge
+            // Movimiento relajado flotante cuando no está en pantalla
             p.wanderAngle += p.wanderSpeed;
             const targetWanderX = p.originX + Math.cos(p.wanderAngle) * p.wanderRadius;
             const targetWanderY = p.originY + Math.sin(p.wanderAngle) * (p.wanderRadius * 0.7);
@@ -350,7 +358,7 @@ export function SandQuoteBanner() {
             p.y += (targetWanderY - p.y) * 0.05;
           }
 
-          // Renderizado del grano
+          // Dibujar el grano de arena
           const color = palette[p.colorIndex % palette.length];
           ctx.fillStyle = color;
           ctx.globalAlpha = p.alpha;
@@ -376,7 +384,7 @@ export function SandQuoteBanner() {
     };
   }, []);
 
-  // Manejo de eventos de ratón y táctiles
+  // Eventos de ratón y táctiles
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -430,14 +438,14 @@ export function SandQuoteBanner() {
         <cite>— {authorName}</cite>
       </blockquote>
 
-      {/* Resplandor ambiental sutil de fondo */}
+      {/* Resplandor ambiental cinematográfico sutil de fondo */}
       <div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none opacity-40 dark:opacity-20 bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.08),transparent_70%)]"
       />
 
       {/* Firma Editorial del Autor (Fade-in suave con Framer Motion) */}
-      <div className="absolute bottom-8 md:bottom-10 z-20 pointer-events-none">
+      <div className="absolute bottom-6 md:bottom-8 z-20 pointer-events-none">
         <AnimatePresence>
           {showAuthor && (
             <motion.div
@@ -448,11 +456,11 @@ export function SandQuoteBanner() {
                 duration: 0.9,
                 ease: [0.16, 1, 0.3, 1],
               }}
-              className="flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-slate-300/40 dark:border-white/10 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xs shadow-2xs"
+              className="flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-slate-300/40 dark:border-white/10 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xs shadow-2xs"
             >
               <span className="w-4 h-[1px] bg-slate-400 dark:bg-slate-600" />
               <span className="text-xs md:text-sm font-medium tracking-widest uppercase text-slate-600 dark:text-slate-400 font-mono">
-                {authorName}
+                — {authorName}
               </span>
               <span className="w-4 h-[1px] bg-slate-400 dark:bg-slate-600" />
             </motion.div>
