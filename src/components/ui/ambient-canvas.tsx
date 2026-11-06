@@ -1,66 +1,277 @@
 "use client";
 
+import React, { useEffect, useRef } from "react";
 import { useTheme } from "@/context/theme-context";
+
+interface SandParticle {
+  originX: number;
+  originY: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  colorIndex: number;
+  freqX: number;
+  freqY: number;
+  ampX: number;
+  ampY: number;
+  phase: number;
+}
+
+// Paleta Dual Relajante (Holographic Pearl vs. Deep Space)
+const LIGHT_PALETTE = [
+  "rgba(148, 163, 184, 0.32)", // Piedra perla
+  "rgba(45, 212, 191, 0.26)",  // Aguamarina suave
+  "rgba(167, 139, 250, 0.24)", // Lavanda etéreo
+  "rgba(251, 146, 60, 0.18)",  // Melocotón suave
+];
+
+const DARK_PALETTE = [
+  "rgba(56, 189, 248, 0.26)",  // Cian ártico
+  "rgba(16, 185, 129, 0.24)",  // Esmeralda
+  "rgba(129, 140, 248, 0.22)", // Índigo
+];
 
 export function AmbientCanvas() {
   const { theme } = useTheme();
-  const isDeepSpace = theme === "deep-space";
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const themeRef = useRef(theme);
+
+  // Mantener themeRef sincronizado sin disparar re-renders ni reiniciar el bucle
+  useEffect(() => {
+    themeRef.current = theme;
+  }, [theme]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d", { alpha: false });
+    if (!ctx) return;
+
+    let animationFrameId: number | null = null;
+    let isRunning = true;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+
+    // Control del ratón mediante referencias mutables (0 re-renders)
+    const mouse = {
+      x: -9999,
+      y: -9999,
+      active: false,
+      isOverInteractive: false,
+    };
+
+    let currentRadius = 130;
+    let currentForce = 1.0;
+
+    // Densidad adaptativa: ~900 en escritorio, ~350 en móvil
+    let particles: SandParticle[] = [];
+
+    const createParticles = (w: number, h: number) => {
+      const isMobile = w < 768;
+      const count = isMobile ? 350 : 900;
+      const list: SandParticle[] = [];
+
+      for (let i = 0; i < count; i++) {
+        const originX = Math.random() * w;
+        const originY = Math.random() * h;
+        list.push({
+          originX,
+          originY,
+          x: originX,
+          y: originY,
+          vx: 0,
+          vy: 0,
+          size: Math.random() * 1.3 + 0.8,
+          colorIndex: i % 4,
+          freqX: Math.random() * 0.0008 + 0.0004,
+          freqY: Math.random() * 0.0010 + 0.0005,
+          ampX: Math.random() * 18 + 8,
+          ampY: Math.random() * 14 + 6,
+          phase: Math.random() * Math.PI * 2,
+        });
+      }
+      return list;
+    };
+
+    // Ajuste de tamaño limitando DPR a 1.5 para máxima eficiencia en 4K
+    const handleResize = () => {
+      if (!canvas) return;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+
+      particles = createParticles(width, height);
+    };
+
+    handleResize();
+
+    // Eventos de puntero no bloqueantes
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      mouse.active = true;
+
+      const target = e.target as HTMLElement | null;
+      mouse.isOverInteractive = Boolean(
+        target &&
+          typeof target.closest === "function" &&
+          target.closest('a, button, [data-cursor="interactive"], .holographic-card, [role="button"]')
+      );
+    };
+
+    const handleMouseLeave = () => {
+      mouse.active = false;
+      mouse.x = -9999;
+      mouse.y = -9999;
+      mouse.isOverInteractive = false;
+    };
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("mouseleave", handleMouseLeave, { passive: true });
+    window.addEventListener("blur", handleMouseLeave, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
+
+    // Bucle generativo 60 FPS
+    const render = () => {
+      if (!isRunning) return;
+
+      const now = performance.now();
+      const isDark =
+        document.documentElement.classList.contains("dark") ||
+        themeRef.current === "deep-space";
+
+      // 1. Limpieza con fondo base correspondiente al tema activo
+      ctx.fillStyle = isDark ? "#0B0F19" : "#F6F7FB";
+      ctx.fillRect(0, 0, width, height);
+
+      // 2. Transición elástica del radio y fuerza magnética al sobrevolar tarjetas o menús
+      const targetRadius = mouse.isOverInteractive ? 180 : 130;
+      const targetForce = mouse.isOverInteractive ? 1.65 : 1.0;
+      currentRadius += (targetRadius - currentRadius) * 0.12;
+      currentForce += (targetForce - currentForce) * 0.12;
+
+      // 3. Simulación física por grano
+      const spring = 0.035;
+      const friction = 0.88;
+      const count = particles.length;
+
+      for (let i = 0; i < count; i++) {
+        const p = particles[i];
+
+        // Reposo orgánico sinusoidal (Dunas de seda en flujo continuo)
+        const flowX =
+          Math.sin(now * p.freqX + p.phase) * p.ampX +
+          Math.cos(now * p.freqY * 0.5 + p.phase) * (p.ampX * 0.35);
+        const flowY =
+          Math.cos(now * p.freqY + p.phase) * p.ampY +
+          Math.sin(now * p.freqX * 0.6 + p.phase) * (p.ampY * 0.35);
+
+        const targetX = p.originX + flowX;
+        const targetY = p.originY + flowY;
+
+        // Repulsión y remolino magnético
+        if (mouse.active) {
+          const dx = p.x - mouse.x;
+          const dy = p.y - mouse.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < currentRadius && dist > 0.001) {
+            const normDist = dist / currentRadius;
+            const intensity = Math.pow(1 - normDist, 1.8) * currentForce;
+
+            // Empuje radial
+            const angle = Math.atan2(dy, dx);
+            const pushSpeed = intensity * 4.4;
+            const rx = Math.cos(angle) * pushSpeed;
+            const ry = Math.sin(angle) * pushSpeed;
+
+            // Remolino tangencial suave
+            const swirlSpeed = intensity * 2.8;
+            const sx = -Math.sin(angle) * swirlSpeed;
+            const sy = Math.cos(angle) * swirlSpeed;
+
+            p.vx += rx + sx;
+            p.vy += ry + sy;
+          }
+        }
+
+        // Retorno elástico amortiguado
+        const ax = (targetX - p.x) * spring;
+        const ay = (targetY - p.y) * spring;
+        p.vx = (p.vx + ax) * friction;
+        p.vy = (p.vy + ay) * friction;
+        p.x += p.vx;
+        p.y += p.vy;
+      }
+
+      // 4. Renderizado optimizado por lotes de color (mínimos context switches)
+      const palette = isDark ? DARK_PALETTE : LIGHT_PALETTE;
+      const paletteLen = palette.length;
+
+      for (let c = 0; c < paletteLen; c++) {
+        ctx.fillStyle = palette[c];
+        ctx.beginPath();
+        for (let i = 0; i < count; i++) {
+          const p = particles[i];
+          if (p.colorIndex % paletteLen === c) {
+            ctx.moveTo(p.x + p.size, p.y);
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          }
+        }
+        ctx.fill();
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    // Control de visibilidad para suspender la CPU en segundo plano
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        isRunning = false;
+        if (animationFrameId !== null) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
+      } else {
+        if (!isRunning) {
+          isRunning = true;
+          animationFrameId = requestAnimationFrame(render);
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    animationFrameId = requestAnimationFrame(render);
+
+    return () => {
+      isRunning = false;
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("blur", handleMouseLeave);
+      window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   return (
-    <div
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 -z-10 pointer-events-none"
       aria-hidden="true"
-      className="fixed inset-0 -z-10 overflow-hidden pointer-events-none select-none transition-colors duration-500 bg-[#F6F7FB] dark:bg-[#0B0F19]"
-    >
-      {/* Subtle architectural editorial grid */}
-      <div className="absolute inset-0 bg-editorial-grid opacity-80" />
-
-      {/* 3 Large Pastel / Cosmic Nebulae animated via GPU translate3d() + scale() */}
-      <div
-        className="animate-halo-cyan absolute -top-32 -left-24 h-[580px] w-[580px] rounded-full blur-3xl transition-opacity duration-700"
-        style={{
-          opacity: isDeepSpace ? 0.35 : 0.6,
-          background: isDeepSpace
-            ? "radial-gradient(circle, rgba(14,165,233,0.35) 0%, rgba(99,102,241,0.18) 48%, transparent 72%)"
-            : "radial-gradient(circle, rgba(34,211,238,0.26) 0%, rgba(56,189,248,0.10) 50%, transparent 72%)",
-        }}
-      />
-
-      <div
-        className="animate-halo-lavender absolute top-[14%] -right-28 h-[640px] w-[640px] rounded-full blur-3xl transition-opacity duration-700"
-        style={{
-          opacity: isDeepSpace ? 0.38 : 0.6,
-          background: isDeepSpace
-            ? "radial-gradient(circle, rgba(139,92,246,0.32) 0%, rgba(236,72,153,0.15) 50%, transparent 72%)"
-            : "radial-gradient(circle, rgba(167,139,250,0.24) 0%, rgba(251,113,133,0.12) 48%, transparent 72%)",
-        }}
-      />
-
-      <div
-        className="animate-halo-mint absolute -bottom-36 left-[22%] h-[600px] w-[600px] rounded-full blur-3xl transition-opacity duration-700"
-        style={{
-          opacity: isDeepSpace ? 0.3 : 0.6,
-          background: isDeepSpace
-            ? "radial-gradient(circle, rgba(16,185,129,0.25) 0%, rgba(6,182,212,0.12) 50%, transparent 72%)"
-            : "radial-gradient(circle, rgba(52,211,153,0.22) 0%, rgba(45,212,191,0.10) 50%, transparent 72%)",
-        }}
-      />
-
-      {/* Tactile Creative Studio SVG Noise Overlay */}
-      <svg
-        className="absolute inset-0 h-full w-full opacity-[0.035] dark:opacity-[0.045] mix-blend-multiply dark:mix-blend-screen"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <filter id="holographic-studio-noise">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.82"
-            numOctaves="3"
-            stitchTiles="stitch"
-          />
-          <feColorMatrix type="saturate" values="0" />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#holographic-studio-noise)" />
-      </svg>
-    </div>
+    />
   );
 }
