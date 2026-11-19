@@ -73,6 +73,24 @@ const EXCLUSION_PATTERNS = [
  */
 const VERIFIED_TECH_REGISTRY = [
   {
+    pattern: /certificado_abraham_mart[íi]n_heras/i,
+    cert: {
+      id: "cert-ibm-bejob-ia-generativa-70h",
+      title: "Curso Certificado de Usos Profesionales de la Inteligencia Artificial Generativa (70h)",
+      issuer: "IBM SkillsBuild & BeJob",
+      year: "2026",
+      category: "Inteligencia Artificial",
+      credentialCode: "IBM-BEJOB-IAGEN-70H",
+      verified: true,
+      skillsCovered: [
+        "IA Generativa aplicada al entorno profesional (70h)",
+        "Arquitectura de la IA y Agentes Autónomos",
+        "Prompting y uso práctico de la IA Generativa",
+        "Automatización con IA y Herramientas Generativas",
+      ],
+    },
+  },
+  {
     pattern: /freecodecamp.*responsive-web-design/i,
     cert: {
       id: "cert-freecodecamp-responsive-web-design",
@@ -531,6 +549,7 @@ async function main() {
     "cert-cybersecurity-google",
     "cert-python-260h",
     "cert-coursera-google-ai-pro",
+    "cert-ibm-bejob-ia-generativa-70h",
     "cert-freecodecamp-responsive-web-design",
     "cert-udemy-perplexity-ai",
     "cert-toma-decisiones-resolucion",

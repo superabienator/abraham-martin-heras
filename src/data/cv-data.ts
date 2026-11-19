@@ -433,6 +433,21 @@ export const cvDataEs: CVData = {
       ]
     },
     {
+      "id": "cert-ibm-bejob-ia-generativa-70h",
+      "title": "Curso Certificado de Usos Profesionales de la Inteligencia Artificial Generativa (70h)",
+      "issuer": "IBM SkillsBuild & BeJob",
+      "year": "2026",
+      "category": "Inteligencia Artificial",
+      "credentialCode": "IBM-BEJOB-IAGEN-70H",
+      "verified": true,
+      "skillsCovered": [
+        "IA Generativa aplicada al entorno profesional (70h)",
+        "Arquitectura de la IA y Agentes Autónomos",
+        "Prompting y uso práctico de la IA Generativa",
+        "Automatización con IA y Herramientas Generativas"
+      ]
+    },
+    {
       "id": "cert-freecodecamp-responsive-web-design",
       "title": "Responsive Web Design Developer Certification",
       "issuer": "freeCodeCamp.org",
